@@ -1,6 +1,6 @@
 theme: hugo-tufte
 languageCode: en-us
-baseurl: https://slashformotion.github.io/hugo-tufte/
+baseurl: https://filedrawer.netlify.app
 title: The File Drawer
 math: yes
 katex: yes
