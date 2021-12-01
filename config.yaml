@@ -1,0 +1,68 @@
+theme: hugo-tufte
+languageCode: en-us
+baseurl: https://slashformotion.github.io/hugo-tufte/
+title: The File Drawer
+math: yes
+katex: yes
+params:
+  copyrightHolder: Jack Bailey, Jon Mellon, and Chris Prosser
+  # github: slashformotion
+  # gitlab: slashformotion
+  # google_scholar: jm5QaHkAAAAJ
+  hidedate: no
+  # instagram: google
+  # mastodon: instance.url/@username
+  # medium: slashformotion
+  # orcid: 0000-0003-0634-3275
+  # patreon: ''
+  # reddit: Slashformotion
+  showPoweredBy: no
+  # stackoverflow: 16609732/slashformotion
+  # subtitle: Whitty subtitle here ... or not
+  # twitter: slashformotion
+  # youtube: user/ChromeDevelopers
+taxonomies:
+  category: categories
+  series: series
+  tag: tags
+menu:
+  # footer:
+  #   - identifier: custom_link
+  #     name: Custom footer link
+  #     pre: '<i class=''fab fa-google fa-lg''></i> '
+  #     url: https://google.com
+  #     weight: -90
+  nav:
+    - identifier: home
+      name: Home
+      # pre: <i class='far fa-circle la-lg'></i>
+      url: /
+      weight: -110
+    - identifier: posts
+      name: Posts
+      # pre: '<i class=''far fa-circle fa-lg''></i> '
+      url: /post
+      weight: -100
+    - identifier: categories
+      name: Categories
+      # pre: '<i class=''far fa-circle fa-lg''></i> '
+      url: /categories
+      weight: -90
+    - identifier: about
+      name: About
+      # pre: '<i class=''far fa-circle  fa-lg''></i> '
+      url: /about
+      weight: -80
+    # - identifier: github
+    #   name: Source Code
+    #   pre: '<i class=''fab fa-github fa-lg''></i> '
+    #   url: https://github.com/slashformotion/hugo-tufte
+    #   weight: -70
+markup:
+  goldmark:
+    renderer:
+      unsafe: yes
+  highlight:
+    canonifyurls: yes
+    noClasses: no
+    pygmentsUseClasses: yes
