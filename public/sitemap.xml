@@ -2,21 +2,21 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://slashformotion.github.io/hugo-tufte/</loc>
+    <loc>https://filedrawer.netlify.app/</loc>
     <lastmod>2020-12-01T21:13:14-05:00</lastmod>
   </url><url>
-    <loc>https://slashformotion.github.io/hugo-tufte/post/2020-12-01-r-rmarkdown/</loc>
+    <loc>https://filedrawer.netlify.app/post/2020-12-01-r-rmarkdown/</loc>
     <lastmod>2020-12-01T21:13:14-05:00</lastmod>
   </url><url>
-    <loc>https://slashformotion.github.io/hugo-tufte/post/</loc>
+    <loc>https://filedrawer.netlify.app/post/</loc>
     <lastmod>2020-12-01T21:13:14-05:00</lastmod>
   </url><url>
-    <loc>https://slashformotion.github.io/hugo-tufte/about/</loc>
+    <loc>https://filedrawer.netlify.app/about/</loc>
   </url><url>
-    <loc>https://slashformotion.github.io/hugo-tufte/categories/</loc>
+    <loc>https://filedrawer.netlify.app/categories/</loc>
   </url><url>
-    <loc>https://slashformotion.github.io/hugo-tufte/series/</loc>
+    <loc>https://filedrawer.netlify.app/series/</loc>
   </url><url>
-    <loc>https://slashformotion.github.io/hugo-tufte/tags/</loc>
+    <loc>https://filedrawer.netlify.app/tags/</loc>
   </url>
 </urlset>
