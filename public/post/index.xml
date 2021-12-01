@@ -1,89 +1,21 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Posts on Hugo-tufte Theme Example Site</title>
+    <title>Posts on The File Drawer</title>
     <link>https://slashformotion.github.io/hugo-tufte/post/</link>
-    <description>Recent content in Posts on Hugo-tufte Theme Example Site</description>
+    <description>Recent content in Posts on The File Drawer</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 20 Jul 2021 13:56:01 -0800</lastBuildDate><atom:link href="https://slashformotion.github.io/hugo-tufte/post/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Tue, 01 Dec 2020 21:13:14 -0500</lastBuildDate><atom:link href="https://slashformotion.github.io/hugo-tufte/post/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>More math $\xi_{(even-in-the-title-!)}$</title>
-      <link>https://slashformotion.github.io/hugo-tufte/post/more-maths/</link>
-      <pubDate>Tue, 20 Jul 2021 13:56:01 -0800</pubDate>
+      <title>Hello R Markdown</title>
+      <link>https://slashformotion.github.io/hugo-tufte/post/2020-12-01-r-rmarkdown/</link>
+      <pubDate>Tue, 01 Dec 2020 21:13:14 -0500</pubDate>
       
-      <guid>https://slashformotion.github.io/hugo-tufte/post/more-maths/</guid>
-      <description>&lt;p&gt;A compilation of $\LaTeX$ formulas&amp;hellip;&lt;/p&gt;</description>
-    </item>
-    
-    <item>
-      <title>Hugo-Tufte Features</title>
-      <link>https://slashformotion.github.io/hugo-tufte/post/tufte-features/</link>
-      <pubDate>Sat, 20 Feb 2016 13:56:01 -0800</pubDate>
-      
-      <guid>https://slashformotion.github.io/hugo-tufte/post/tufte-features/</guid>
-      <description>&lt;p&gt;This is a quick demonstration post.  It serves as an example of the features
-of this theme.  One of them is $ \LaTeX $ via &lt;a href=&#34;https://katex.org/&#34;&gt;Katex&lt;/a&gt;.
-
-
-  &lt;section&gt;
-
-    
-&lt;/p&gt;
-&lt;h2 id=&#34;a-bit-about-mathematics&#34;&gt;A Bit About Mathematics&lt;/h2&gt;
-&lt;div class=&#34;epigraph&#34;&gt;
-&lt;blockquote&gt;
-
-&lt;p&gt;This is an example of an epigraph with some math
-$ \mathbb N \subseteq \mathbb R $
-to start the beginning of a section.&lt;/p&gt;
-
-&lt;footer&gt;
-Shawn O&amp;#39;Hare, 
-
-&lt;cite&gt;Math is Fun&lt;/cite&gt;
-&lt;/a&gt;
-
-&lt;/footer&gt;
-
-&lt;blockquote&gt;
-&lt;/div&gt;</description>
-    </item>
-    
-    <item>
-      <title>Hide Date</title>
-      <link>https://slashformotion.github.io/hugo-tufte/post/nodate/</link>
-      <pubDate>Fri, 15 May 2015 00:00:00 +0000</pubDate>
-      
-      <guid>https://slashformotion.github.io/hugo-tufte/post/nodate/</guid>
-      <description>Here is an example post where the date set, but hidden from display.
-Moreover, the reading time is also hidden.</description>
-    </item>
-    
-    <item>
-      <title>Blockquotes</title>
-      <link>https://slashformotion.github.io/hugo-tufte/post/blockquote/</link>
-      <pubDate>Mon, 19 Jan 2015 23:57:58 -0800</pubDate>
-      
-      <guid>https://slashformotion.github.io/hugo-tufte/post/blockquote/</guid>
-      <description>&lt;p&gt;Below is a blockquote.&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;This is a blockquote with two paragraphs. Lorem ipsum dolor sit amet,
-consectetuer adipiscing elit. Aliquam hendrerit mi posuere lectus.
-Vestibulum enim wisi, viverra nec, fringilla in, laoreet vitae, risus.&lt;/p&gt;
-&lt;p&gt;Donec sit amet nisl. Aliquam semper ipsum sit amet velit. Suspendisse
-id sem consectetuer libero luctus adipiscing.&lt;/p&gt;
-&lt;/blockquote&gt;</description>
-    </item>
-    
-    <item>
-      <title>Just another sample post</title>
-      <link>https://slashformotion.github.io/hugo-tufte/post/new/</link>
-      <pubDate>Sat, 29 Mar 2014 00:00:00 +0000</pubDate>
-      
-      <guid>https://slashformotion.github.io/hugo-tufte/post/new/</guid>
-      <description>First Heading    Tables Are Cool     col 1 is left-aligned $1600   col 2 is centered $12   col 3 is right-aligned $1    Lorem ipsum dolor sit amet, consectetur adipisicing elit. Accusamus, consequatur aspernatur omnis iste. Voluptates, id inventore ea natus ab sed amet ipsa ratione sunt dignissimos. Soluta illum aliquid repellendus recusandae.
-Sub Lorem ipsum dolor sit amet, consectetur adipisicing elit.</description>
+      <guid>https://slashformotion.github.io/hugo-tufte/post/2020-12-01-r-rmarkdown/</guid>
+      <description>R Markdown This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see http://rmarkdown.rstudio.com.
+You can embed an R code chunk like this:
+summary(cars) ## speed dist ## Min. : 4.0 Min. : 2.00 ## 1st Qu.:12.0 1st Qu.: 26.00 ## Median :15.0 Median : 36.00 ## Mean :15.4 Mean : 42.</description>
     </item>
     
   </channel>
