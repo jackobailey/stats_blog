@@ -4,6 +4,7 @@ baseurl: https://filedrawer.blog
 title: The File Drawer
 math: yes
 katex: yes
+googleAnalytics: "G-LTMXKX6ZFD"
 params:
   copyrightHolder: Jack Bailey, Jon Mellon, and Chris Prosser
   # github: slashformotion
