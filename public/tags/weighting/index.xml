@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>The File Drawer</title>
-    <link>https://filedrawer.netlify.app/</link>
-    <description>Recent content on The File Drawer</description>
+    <title>weighting on The File Drawer</title>
+    <link>https://filedrawer.netlify.app/tags/weighting/</link>
+    <description>Recent content in weighting on The File Drawer</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 01 Dec 2020 21:13:14 -0500</lastBuildDate><atom:link href="https://filedrawer.netlify.app/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Tue, 01 Dec 2020 21:13:14 -0500</lastBuildDate><atom:link href="https://filedrawer.netlify.app/tags/weighting/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>The minimum post-stratification weight in a simple-random-sample equals the response rate</title>
       <link>https://filedrawer.netlify.app/post/2021-12-09-jon-weights/</link>
@@ -15,15 +15,6 @@
       <guid>https://filedrawer.netlify.app/post/2021-12-09-jon-weights/</guid>
       <description>As my first post on the File Drawer, I wanted to share a survey statistics result that surprised me and that I haven’t seen derived before. At the very least, I know that this result is not used in any applied weighting work that I’ve seen.
 How differential nonresponse ruins the law of large numbers Random samples have fantastic statistical properties. As the sample size increases, the law of large numbers guarantees that your estimate will converge on the true population value.</description>
-    </item>
-    
-    <item>
-      <title>About</title>
-      <link>https://filedrawer.netlify.app/about/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>https://filedrawer.netlify.app/about/</guid>
-      <description>This blog has three authors: Jack Bailey, Jon Mellon, and Chris Prosser. We&amp;rsquo;re colleagues on the British Election Study, though the blog is not affiliated with the BES. Instead, it&amp;rsquo;s a place for us to share small insights that we&amp;rsquo;ve come across in our day-to-day work. Some of these insights will be about statistics, some will be about politics, and some will be miscellaneous. But all come with an important health warning: they might be wrong and are always subject to revision.</description>
     </item>
     
   </channel>
