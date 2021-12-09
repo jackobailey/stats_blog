@@ -9,10 +9,10 @@
     <lastBuildDate>Tue, 01 Dec 2020 21:13:14 -0500</lastBuildDate><atom:link href="https://filedrawer.netlify.app/categories/raking/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>The minimum post-stratification weight in a simple-random-sample equals the response rate</title>
-      <link>https://filedrawer.netlify.app/post/2021-12-09-jon-weights/</link>
+      <link>https://filedrawer.netlify.app/post/minimum-post-strat-weight-is-response-rate/</link>
       <pubDate>Tue, 01 Dec 2020 21:13:14 -0500</pubDate>
       
-      <guid>https://filedrawer.netlify.app/post/2021-12-09-jon-weights/</guid>
+      <guid>https://filedrawer.netlify.app/post/minimum-post-strat-weight-is-response-rate/</guid>
       <description>As my first post on the File Drawer, I wanted to share a survey statistics result that surprised me and that I haven’t seen derived before. At the very least, I know that this result is not used in any applied weighting work that I’ve seen.
 How differential nonresponse ruins the law of large numbers Random samples have fantastic statistical properties. As the sample size increases, the law of large numbers guarantees that your estimate will converge on the true population value.</description>
     </item>
