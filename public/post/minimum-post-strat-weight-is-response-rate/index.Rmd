@@ -219,7 +219,8 @@ weight.prop.plot <- ggplot(props.to.plot, aes(x = Group,y = value,
                                         fill = Weighting)) + 
   geom_bar(stat= "identity", position = "dodge") +
   ylab("Proportion of the sample") + 
-  theme_minimal() + xlab("") + scale_y_continuous(labels = percent)
+  theme_minimal() + xlab("") + scale_y_continuous(labels = percent)+
+  scale_fill_viridis_d()
 ```
 
 
@@ -292,7 +293,8 @@ weight.prop.plot <- ggplot(props.to.plot, aes(x = Group,y = value,
                                         fill = Weighting)) + 
   geom_bar(stat= "identity", position = "dodge") +
   ylab("Proportion of the sample") + 
-  theme_minimal() + xlab("") + scale_y_continuous(labels = percent)
+  theme_minimal() + xlab("") + scale_y_continuous(labels = percent) +
+  scale_fill_viridis_d()
 weight.prop.plot
 ```
 
