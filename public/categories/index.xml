@@ -2,62 +2,62 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Categories on The File Drawer</title>
-    <link>https://filedrawer.netlify.app/categories/</link>
+    <link>https://filedrawer.blog/categories/</link>
     <description>Recent content in Categories on The File Drawer</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 01 Dec 2020 21:13:14 -0500</lastBuildDate><atom:link href="https://filedrawer.netlify.app/categories/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Tue, 01 Dec 2020 21:13:14 -0500</lastBuildDate><atom:link href="https://filedrawer.blog/categories/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>post-stratification</title>
-      <link>https://filedrawer.netlify.app/categories/post-stratification/</link>
+      <link>https://filedrawer.blog/categories/post-stratification/</link>
       <pubDate>Tue, 01 Dec 2020 21:13:14 -0500</pubDate>
       
-      <guid>https://filedrawer.netlify.app/categories/post-stratification/</guid>
+      <guid>https://filedrawer.blog/categories/post-stratification/</guid>
       <description></description>
     </item>
     
     <item>
       <title>R Markdown</title>
-      <link>https://filedrawer.netlify.app/categories/r-markdown/</link>
+      <link>https://filedrawer.blog/categories/r-markdown/</link>
       <pubDate>Tue, 01 Dec 2020 21:13:14 -0500</pubDate>
       
-      <guid>https://filedrawer.netlify.app/categories/r-markdown/</guid>
+      <guid>https://filedrawer.blog/categories/r-markdown/</guid>
       <description></description>
     </item>
     
     <item>
       <title>raking</title>
-      <link>https://filedrawer.netlify.app/categories/raking/</link>
+      <link>https://filedrawer.blog/categories/raking/</link>
       <pubDate>Tue, 01 Dec 2020 21:13:14 -0500</pubDate>
       
-      <guid>https://filedrawer.netlify.app/categories/raking/</guid>
+      <guid>https://filedrawer.blog/categories/raking/</guid>
       <description></description>
     </item>
     
     <item>
       <title>response rate</title>
-      <link>https://filedrawer.netlify.app/categories/response-rate/</link>
+      <link>https://filedrawer.blog/categories/response-rate/</link>
       <pubDate>Tue, 01 Dec 2020 21:13:14 -0500</pubDate>
       
-      <guid>https://filedrawer.netlify.app/categories/response-rate/</guid>
+      <guid>https://filedrawer.blog/categories/response-rate/</guid>
       <description></description>
     </item>
     
     <item>
       <title>surveys</title>
-      <link>https://filedrawer.netlify.app/categories/surveys/</link>
+      <link>https://filedrawer.blog/categories/surveys/</link>
       <pubDate>Tue, 01 Dec 2020 21:13:14 -0500</pubDate>
       
-      <guid>https://filedrawer.netlify.app/categories/surveys/</guid>
+      <guid>https://filedrawer.blog/categories/surveys/</guid>
       <description></description>
     </item>
     
     <item>
       <title>weighting</title>
-      <link>https://filedrawer.netlify.app/categories/weighting/</link>
+      <link>https://filedrawer.blog/categories/weighting/</link>
       <pubDate>Tue, 01 Dec 2020 21:13:14 -0500</pubDate>
       
-      <guid>https://filedrawer.netlify.app/categories/weighting/</guid>
+      <guid>https://filedrawer.blog/categories/weighting/</guid>
       <description></description>
     </item>
     

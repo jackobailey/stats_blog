@@ -1,6 +1,6 @@
 theme: hugo-tufte
 languageCode: en-us
-baseurl: https://filedrawer.netlify.app
+baseurl: https://filedrawer.blog
 title: The File Drawer
 math: yes
 katex: yes

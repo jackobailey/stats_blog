@@ -2,62 +2,62 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Tags on The File Drawer</title>
-    <link>https://filedrawer.netlify.app/tags/</link>
+    <link>https://filedrawer.blog/tags/</link>
     <description>Recent content in Tags on The File Drawer</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 01 Dec 2020 21:13:14 -0500</lastBuildDate><atom:link href="https://filedrawer.netlify.app/tags/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Tue, 01 Dec 2020 21:13:14 -0500</lastBuildDate><atom:link href="https://filedrawer.blog/tags/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>post-stratification</title>
-      <link>https://filedrawer.netlify.app/tags/post-stratification/</link>
+      <link>https://filedrawer.blog/tags/post-stratification/</link>
       <pubDate>Tue, 01 Dec 2020 21:13:14 -0500</pubDate>
       
-      <guid>https://filedrawer.netlify.app/tags/post-stratification/</guid>
+      <guid>https://filedrawer.blog/tags/post-stratification/</guid>
       <description></description>
     </item>
     
     <item>
       <title>R Markdown</title>
-      <link>https://filedrawer.netlify.app/tags/r-markdown/</link>
+      <link>https://filedrawer.blog/tags/r-markdown/</link>
       <pubDate>Tue, 01 Dec 2020 21:13:14 -0500</pubDate>
       
-      <guid>https://filedrawer.netlify.app/tags/r-markdown/</guid>
+      <guid>https://filedrawer.blog/tags/r-markdown/</guid>
       <description></description>
     </item>
     
     <item>
       <title>raking</title>
-      <link>https://filedrawer.netlify.app/tags/raking/</link>
+      <link>https://filedrawer.blog/tags/raking/</link>
       <pubDate>Tue, 01 Dec 2020 21:13:14 -0500</pubDate>
       
-      <guid>https://filedrawer.netlify.app/tags/raking/</guid>
+      <guid>https://filedrawer.blog/tags/raking/</guid>
       <description></description>
     </item>
     
     <item>
       <title>response rate</title>
-      <link>https://filedrawer.netlify.app/tags/response-rate/</link>
+      <link>https://filedrawer.blog/tags/response-rate/</link>
       <pubDate>Tue, 01 Dec 2020 21:13:14 -0500</pubDate>
       
-      <guid>https://filedrawer.netlify.app/tags/response-rate/</guid>
+      <guid>https://filedrawer.blog/tags/response-rate/</guid>
       <description></description>
     </item>
     
     <item>
       <title>surveys</title>
-      <link>https://filedrawer.netlify.app/tags/surveys/</link>
+      <link>https://filedrawer.blog/tags/surveys/</link>
       <pubDate>Tue, 01 Dec 2020 21:13:14 -0500</pubDate>
       
-      <guid>https://filedrawer.netlify.app/tags/surveys/</guid>
+      <guid>https://filedrawer.blog/tags/surveys/</guid>
       <description></description>
     </item>
     
     <item>
       <title>weighting</title>
-      <link>https://filedrawer.netlify.app/tags/weighting/</link>
+      <link>https://filedrawer.blog/tags/weighting/</link>
       <pubDate>Tue, 01 Dec 2020 21:13:14 -0500</pubDate>
       
-      <guid>https://filedrawer.netlify.app/tags/weighting/</guid>
+      <guid>https://filedrawer.blog/tags/weighting/</guid>
       <description></description>
     </item>
     

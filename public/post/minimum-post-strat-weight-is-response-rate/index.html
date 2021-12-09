@@ -6,7 +6,7 @@
 <meta name="description"
     content="As my first post on the File Drawer, I wanted to share a survey statistics result that surprised me and that I haven’t seen derived before. At the very least, I know that this result is not used in any applied weighting work that I’ve seen.
 How differential nonresponse ruins the law of large numbersRandom samples have fantastic statistical properties. As the sample size increases, the law of large numbers guarantees that your estimate will converge on the true population value. ">
-<link rel="canonical" href="https://filedrawer.netlify.app/post/minimum-post-strat-weight-is-response-rate/" />
+<link rel="canonical" href="https://filedrawer.blog/post/minimum-post-strat-weight-is-response-rate/" />
 
 <link rel="icon" type="image/x-icon" href="/favicon/favicon.ico">
   
@@ -50,7 +50,7 @@ How differential nonresponse ruins the law of large numbersRandom samples have 
 <div id="layout" class="pure-g">
   <article class="pure-u-1">
     <header class="brand">
-  <a href="https://filedrawer.netlify.app"><h1>The File Drawer</h1></a>
+  <a href="https://filedrawer.blog"><h1>The File Drawer</h1></a>
   <h2></h2>
   <nav class="menu">
     <ul>
@@ -100,17 +100,17 @@ How differential nonresponse ruins the law of large numbersRandom samples have 
           <br>
           <i class="fa fa-tags"> </i>
           
-            <a  href="https://filedrawer.netlify.app/categories/r-markdown">R Markdown</a>
+            <a  href="https://filedrawer.blog/categories/r-markdown">R Markdown</a>
           
-            <a  href="https://filedrawer.netlify.app/categories/post-stratification">post-stratification</a>
+            <a  href="https://filedrawer.blog/categories/post-stratification">post-stratification</a>
           
-            <a  href="https://filedrawer.netlify.app/categories/response-rate">response rate</a>
+            <a  href="https://filedrawer.blog/categories/response-rate">response rate</a>
           
-            <a  href="https://filedrawer.netlify.app/categories/surveys">surveys</a>
+            <a  href="https://filedrawer.blog/categories/surveys">surveys</a>
           
-            <a  href="https://filedrawer.netlify.app/categories/weighting">weighting</a>
+            <a  href="https://filedrawer.blog/categories/weighting">weighting</a>
           
-            <a  href="https://filedrawer.netlify.app/categories/raking">raking</a>
+            <a  href="https://filedrawer.blog/categories/raking">raking</a>
           
         
       </span>
@@ -120,7 +120,7 @@ How differential nonresponse ruins the law of large numbersRandom samples have 
     
 
     <section>
-<script src="https://filedrawer.netlify.app/post/minimum-post-strat-weight-is-response-rate/index_files/header-attrs/header-attrs.js"></script>
+<script src="https://filedrawer.blog/post/minimum-post-strat-weight-is-response-rate/index_files/header-attrs/header-attrs.js"></script>
 
 
 <p>As my first post on the File Drawer, I wanted to share a survey statistics result that surprised me and that I haven’t seen derived before. At the very least, I know that this result is not used in any applied weighting work that I’ve seen.</p>
@@ -230,7 +230,7 @@ NewWeight_j = \frac{Population_{\neg A}}{WeightedSample_{\neg A}} \cdot OldWeigh
 <p>We can see in the following plot that the raw sample does a very bad job at representing the size of each subgroup properly. The standard raking algorithm improves the situation substantially, but it underestimates the proportion of poor unvaccinated people and–perhaps more surprisingly–the proportion of rich vaccinated people.</p>
 <p>However, when I add in the constraint that the minimum weight in a cell is equal to the overall response rate for the survey (0.5), the proportions in the weighted sample are corrected to exactly match the true proportions.</p>
 <div class="figure"><span style="display:block;" id="fig:unnamed-chunk-5"></span>
-<img src="https://filedrawer.netlify.app/post/minimum-post-strat-weight-is-response-rate/index_files/figure-html/unnamed-chunk-5-1.png" alt="Proportion of people in each combination of wealth and vaccination status for the actual population, unweighted survey, using standard raking, and using raking with the minimum response rate fix." width="672" />
+<img src="https://filedrawer.blog/post/minimum-post-strat-weight-is-response-rate/index_files/figure-html/unnamed-chunk-5-1.png" alt="Proportion of people in each combination of wealth and vaccination status for the actual population, unweighted survey, using standard raking, and using raking with the minimum response rate fix." width="672" />
 <p class="caption">
 Figure 1: Proportion of people in each combination of wealth and vaccination status for the actual population, unweighted survey, using standard raking, and using raking with the minimum response rate fix.
 </p>
@@ -261,7 +261,7 @@ Figure 1: Proportion of people in each combination of wealth and vaccination sta
 </tbody>
 </table>
 <p>The next plot shows that the minimum weight constraint no longer magically nails the cell proportions, but that we do see an improvement in the proportions when we include the constraint.</p>
-<p><img src="https://filedrawer.netlify.app/post/minimum-post-strat-weight-is-response-rate/index_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<p><img src="https://filedrawer.blog/post/minimum-post-strat-weight-is-response-rate/index_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
 </div>
 <div id="is-this-useful-in-the-real-world" class="section level2">
 <h2>Is this useful in the real world?</h2>
@@ -290,7 +290,7 @@ levels of unobserved self-selection, there is no equivalent of a minimum weight 
 
     <div class="previous-post" style="display:inline-block;">
       
-      <a class="link-reverse" href="https://filedrawer.netlify.app/about/?ref=footer">« About</a>
+      <a class="link-reverse" href="https://filedrawer.blog/about/?ref=footer">« About</a>
       
     </div>
 

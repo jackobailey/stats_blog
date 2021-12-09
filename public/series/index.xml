@@ -2,9 +2,9 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Series on The File Drawer</title>
-    <link>https://filedrawer.netlify.app/series/</link>
+    <link>https://filedrawer.blog/series/</link>
     <description>Recent content in Series on The File Drawer</description>
     <generator>Hugo -- gohugo.io</generator>
-    <language>en-us</language><atom:link href="https://filedrawer.netlify.app/series/index.xml" rel="self" type="application/rss+xml" />
+    <language>en-us</language><atom:link href="https://filedrawer.blog/series/index.xml" rel="self" type="application/rss+xml" />
   </channel>
 </rss>
