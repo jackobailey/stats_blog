@@ -2,11 +2,11 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>r on The File Drawer</title>
-    <link>https://filedrawer.blog/categories/r/</link>
+    <link>https://filedrawer.blog/tags/r/</link>
     <description>Recent content in r on The File Drawer</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Thu, 10 Dec 2020 21:09:33 -0500</lastBuildDate><atom:link href="https://filedrawer.blog/categories/r/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Thu, 10 Dec 2020 21:09:33 -0500</lastBuildDate><atom:link href="https://filedrawer.blog/tags/r/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>A simple function for creating dummy variables in R</title>
       <link>https://filedrawer.blog/post/dummy-variable-function/</link>
