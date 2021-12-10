@@ -1,164 +1,31 @@
 ---
-title: A simple function for creating dummy variables in R
+title: "Farage's Brexit Party Announcement and the 2019 Campaign"
 author: "Jack Bailey"
-date: 2020-12-10T21:09:33-05:00
-categories: ["r", "dummy variables"]
-tags: ["r", "dummy variables"]
-math: true
+date: 2020-12-10T21:12:06-05:00
+categories: ["nigel farage", "brexit party", "GE 2019"]
+tags: ["nigel farage", "brexit party", "GE 2019"]
 ---
-
-```{r setup, include = F}
+  
+  ```{r setup, include = F}
 set.seed(666)
 ```
 
-As someone interested in economic voting, I create a lot of dummy variables. Most often, I have to use self-reported vote choice to create a dummy variable that shows if a respondent voted for the incumbent party or not.
+John Curtice, Stephen Fisher, and Patrick English [made headlines recently](https://www.theguardian.com/politics/2021/nov/03/nigel-farages-brexit-party-saved-labour-seats-in-2019-election-analysis-finds) for claiming that Nigel Farage's decision to stand down his party in certain seats saved the Labour Party from an even worse result in the 2019 general election. They have a nice blog on the topic that they [released on Elections Etc.](https://electionsetc.com/2021/12/10/what-impact-did-the-brexit-party-have-in-the-2019-general-election/) today. I also have some data on this topic, but haven't released it until now.
 
-For the uninitiated, a "dummy variable" is like a light switch. It can be either "off" (where it equals 0) or "on" (where it equals 1). We tend to use them to work out how the presence of something we're interested in affects an outcome. They can sometimes be outcomes in their own right too.
+In the middle of the 2019 campaign there was an ONS announcement of the latest GDP data. At that point, the previous quarter's GDP had been negative and there was a real chance that the next quarter might be negative too. If that were the case, it would imply that the country was in recession in the middle of the campaign. I wanted to know if and how quickly voters would respond to the news, so ran a survey of around 18,000 people with YouGov over the course of several days that straddled the announcement date.
 
-The problem I often face is that R doesn't have a good inbuilt dummy variable function.
+I had wanted to use these data to run a regression discontinuity design to estimate the effect that the economic announcement had on voters' economic perceptions. Unfortunately for me, but fortunately for the rest of you, two things happened that ruined my data collection. First, the GDP announcement was positive. Second, Nigel Farage intervened and announced on the same day that his Brexit Party would stand down candidates in 317 Conservative-held seats.
 
-Let's simulate a toy version of the problem at hand. Imagine that we offer 10 people a choice of hot drink. They can choose either coffee, tea, or hot chocolate. We want to create a dummy variable that tells us if they picked a caffeinated drink. Here's the code:
+I decided to change tack and see how Farage's shock announcement affected how people intended to vote during the campaign. Turns out, it didn't. The figure below is a simple RDD that shows how Conservative and Labour voting intention changed over the course of the days included in my survey. (A less simple non-linear RDD produces almost exactly the same results). As we can see, the vote share for both parties goes up over time, but there isn't really a change around the announcement date itself. Note that I haven't excluded people who said that they wouldn't vote etc. to ensure that the implied denominator is consistent regardless of treatment status. This is why the vote shares here are a little lower than we might otherwise expect.
 
-```{r sim-drinks}
+<img src="/post/bit-more-on-brexit-party/main-plot.png" alt="final image" width="1000"/>
 
-# Create list of drinks
+This implies that the effects that John, Steve, and Patrick find didn't affect the parties that voters supported *during* the campaign. Rather, it likely affected how they voted by constraining voters' choices sets in certain constituencies.
 
-drinks <- c("Coffee", "Tea", "Hot Chocolate")
+One might think "Yes, but perhaps this is because Leave and Remain voters moved in opposite directions, cancelling on aggregate". And if you did, you'd be sensible but wrong. As the figure below shows, there was no discernible effect when we break things down by vote in the 2016 referendum either.
 
+<img src="/post/bit-more-on-brexit-party/eu_plot.png" alt="final image" width="1000"/>
+  
+  Overall, I think these null findings are interesting for two reasons. First, they help us to narrow down how Farage's announcement might have led to the results that John, Steve, and Patrick find. Second, they go to show that seemingly important events that occur during election campaigns can do very little to shift support.
 
-# Pick drinks for each of our 10 people at random
-
-choices <- sample(drinks, size = 10, replace = TRUE)
-
-
-# Print choices
-
-data.frame(choices)
-
-```
-
-As we can see, `r length(choices[choices == "Coffee"])` of our guests have chosen coffee, `r length(choices[choices == "Tea"])` have chosen tea, and `r length(choices[choices == "Hot Chocolate"])` have chosen hot chocolate.
-
-I most often see people create dummies using the `ifelse()` function. Given an input (say that the choice is coffee), `ifelse()` produces two outputs: one if the input is true and one if it's false. Let's see what happens:
-
-```{r ifelse}
-
-# Use ifelse to create a caffeinated drink dummy
-
-caff_ifelse <- 
-  ifelse(
-    choices %in% c("Coffee", "Tea"),
-    1,
-    0
-  )
-
-
-# Print choices
-
-data.frame(choices, caff_ifelse)
-
-```
-
-Everything looks good. All the caffeinated drinks have got a value of 1 and the non-caffeinated one has a value of 0. But things aren't so great when we introduce missingness to the data. And this is important, because missingness is a fundamental feature of most real-world data. For example:
-
-```{r ifelse-missing}
-
-# Mark first case of "Hot Chocolate" as missing
-
-choices_miss <- choices
-choices_miss[choices_miss == "Hot Chocolate"][1] <- NA
-
-
-# Use ifelse to create a caffeinated drink dummy
-
-caff_ifelse_miss <- 
-  ifelse(
-    choices_miss %in% c("Coffee", "Tea"),
-    1,
-    0
-  )
-
-
-# Print choices
-
-data.frame(choices_miss, caff_ifelse_miss)
-
-```
-
-Look at row `r which(is.na(choices_miss) == T)` of the data. Despite the input vector including some missingness, the output dummy vector *does not* reflect this missingness. This is because it's a lot more logical than we are. Technically, a missing value *is not* the same as choosing either coffee or tea. But what we tend to want in practice is for our dummy to reflect any missingess present in the input data.
-
-On top of all of this, it's sometimes nice to recode the dummy variable into a factor variable that provides us with some information about what the categories even mean. This is especially useful when it comes to using the variable in a model, as common functions like `lm()` treat discrete and continuous data differently and these differences often propagate through into plotting functions that other members of the R community have written.
-
-Here's my solution to the problem (included in my [jbmisc package](https://github.com/jackobailey/jbmisc)):
-
-```{r as_dummy}
-
-as_dummy <- 
-  function(
-    x,
-    terms = NULL,
-    factor = F,
-    labels = c("Off", "On")
-    ){
-
-    
-  # Create dummy variable
-
-  x <-
-    ifelse(
-      is.na(x) == T,
-      NA,
-      ifelse(
-        x %in% terms,
-        1,
-        0
-      )
-    )
-
-
-  # Convert to factor if desired
-
-  if(factor == T){
-    x <-
-      factor(
-        x,
-        levels = 0:1,
-        labels = labels
-      )
-  }
-
-
-  # Return x
-
-  return(x)
-
-}
-
-```
-
-My function, `as_dummy()`, deals with creating the dummy, missing data, and converting the dummy to a factor in one go. You pass it a vector of data (`x`), tell it what terms you want to mark as 1 (`terms`), then tell it if you want the output vector to be a factor (`factor = T/F`) and, if so, what the labels should be (here the defaults are `labels = c("Off", "On")`).
-
-Let's go back to our toy example and try to solve the problem using `as_dummy()`. For argument's sake, let's also assume that we want our output to be a factor:
-
-```{r as_dummy-example}
-
-# Use as_dummy() to create a caffeinated drink dummy
-
-caff_as_dummy <- 
-  as_dummy(
-    choices_miss,
-    terms = c("Coffee", "Tea"),
-    factor = T,
-    labels = c("Non-caffeinated", "Caffeinated")
-  )
-
-
-# Print choices
-
-data.frame(choices_miss, caff_as_dummy)
-
-```
-
-Nice! Looks like it works. The dummy is coded correctly into caffeinated and non-caffeinated drinks, the missingeness in the input vector is respected, and the output dummy is a nicely-labelled factor ready for including in an analysis.
-
-Like I said at the start of this post, I use this function all the time. Hopefully it will save you some time too. If you have any ideas of how to improve it or make it more efficient, feel free to shoot me a message [on Twitter](https://www.twitter.com/PoliSciJack)!
+If anyone's interested in doing something with this data, I'm more than happy to share them. They include standard voting variables plus some retrospective personal and national economic perception items. Likewise, similar data are available in the [British Election Study Internet Panel](http://britishelectionstudy.com).

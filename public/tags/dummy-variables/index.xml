@@ -9,10 +9,10 @@
     <lastBuildDate>Thu, 10 Dec 2020 21:09:33 -0500</lastBuildDate><atom:link href="https://filedrawer.blog/tags/dummy-variables/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>A simple function for creating dummy variables in R</title>
-      <link>https://filedrawer.blog/post/bit-more-on-brexit-party/</link>
+      <link>https://filedrawer.blog/post/dummy-variable-function/</link>
       <pubDate>Thu, 10 Dec 2020 21:09:33 -0500</pubDate>
       
-      <guid>https://filedrawer.blog/post/bit-more-on-brexit-party/</guid>
+      <guid>https://filedrawer.blog/post/dummy-variable-function/</guid>
       <description>As someone interested in economic voting, I create a lot of dummy variables. Most often, I have to use self-reported vote choice to create a dummy variable that shows if a respondent voted for the incumbent party or not.
 For the uninitiated, a “dummy variable” is like a light switch. It can be either “off” (where it equals 0) or “on” (where it equals 1). We tend to use them to work out how the presence of something we’re interested in affects an outcome.</description>
     </item>
