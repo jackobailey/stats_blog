@@ -5,10 +5,6 @@ date: 2020-12-10T21:12:06-05:00
 categories: ["nigel farage", "brexit party", "GE 2019"]
 tags: ["nigel farage", "brexit party", "GE 2019"]
 ---
-  
-  ```{r setup, include = F}
-set.seed(666)
-```
 
 John Curtice, Stephen Fisher, and Patrick English [made headlines recently](https://www.theguardian.com/politics/2021/nov/03/nigel-farages-brexit-party-saved-labour-seats-in-2019-election-analysis-finds) for claiming that Nigel Farage's decision to stand down his party in certain seats saved the Labour Party from an even worse result in the 2019 general election. They have a nice blog on the topic that they [released on Elections Etc.](https://electionsetc.com/2021/12/10/what-impact-did-the-brexit-party-have-in-the-2019-general-election/) today. I also have some data on this topic, but haven't released it until now.
 
@@ -26,6 +22,6 @@ One might think "Yes, but perhaps this is because Leave and Remain voters moved 
 
 <img src="/post/bit-more-on-brexit-party/eu_plot.png" alt="final image" width="1000"/>
   
-  Overall, I think these null findings are interesting for two reasons. First, they help us to narrow down how Farage's announcement might have led to the results that John, Steve, and Patrick find. Second, they go to show that seemingly important events that occur during election campaigns can do very little to shift support.
+Overall, I think these null findings are interesting for two reasons. First, they help us to narrow down how Farage's announcement might have led to the results that John, Steve, and Patrick find. Second, they go to show that seemingly important events that occur during election campaigns can still not affect support for different parties.
 
-If anyone's interested in doing something with this data, I'm more than happy to share them. They include standard voting variables plus some retrospective personal and national economic perception items. Likewise, similar data are available in the [British Election Study Internet Panel](http://britishelectionstudy.com).
+If anyone's interested in doing something with this data set, I'm more than happy to share it. They include standard voting variables plus some retrospective personal and national economic perception items. Likewise, similar data are available in the [British Election Study Internet Panel](http://britishelectionstudy.com).

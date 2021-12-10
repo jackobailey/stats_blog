@@ -22,6 +22,6 @@ One might think "Yes, but perhaps this is because Leave and Remain voters moved 
 
 <img src="/post/bit-more-on-brexit-party/eu_plot.png" alt="final image" width="1000"/>
   
-Overall, I think these null findings are interesting for two reasons. First, they help us to narrow down how Farage's announcement might have led to the results that John, Steve, and Patrick find. Second, they go to show that seemingly important events that occur during election campaigns can do very little to shift support.
+Overall, I think these null findings are interesting for two reasons. First, they help us to narrow down how Farage's announcement might have led to the results that John, Steve, and Patrick find. Second, they go to show that seemingly important events that occur during election campaigns can still not affect support for different parties.
 
-If anyone's interested in doing something with this data, I'm more than happy to share them. They include standard voting variables plus some retrospective personal and national economic perception items. Likewise, similar data are available in the [British Election Study Internet Panel](http://britishelectionstudy.com).
+If anyone's interested in doing something with this data set, I'm more than happy to share it. They include standard voting variables plus some retrospective personal and national economic perception items. Likewise, similar data are available in the [British Election Study Internet Panel](http://britishelectionstudy.com).
