@@ -1,0 +1,164 @@
+---
+title: A simple function for creating dummy variables in R
+author: "Jack Bailey"
+date: 2020-12-10T21:09:33-05:00
+categories: ["r", "dummy variables"]
+tags: ["r", "dummy variables"]
+math: true
+---
+
+```{r setup, include = F}
+set.seed(666)
+```
+
+As someone interested in economic voting, I create a lot of dummy variables. Most often, I have to use self-reported vote choice to create a dummy variable that shows if a respondent voted for the incumbent party or not.
+
+For the uninitiated, a "dummy variable" is like a light switch. It can be either "off" (where it equals 0) or "on" (where it equals 1). We tend to use them to work out how the presence of something we're interested in affects an outcome. They can sometimes be outcomes in their own right too.
+
+The problem I often face is that R doesn't have a good inbuilt dummy variable function.
+
+Let's simulate a toy version of the problem at hand. Imagine that we offer 10 people a choice of hot drink. They can choose either coffee, tea, or hot chocolate. We want to create a dummy variable that tells us if they picked a caffeinated drink. Here's the code:
+
+```{r sim-drinks}
+
+# Create list of drinks
+
+drinks <- c("Coffee", "Tea", "Hot Chocolate")
+
+
+# Pick drinks for each of our 10 people at random
+
+choices <- sample(drinks, size = 10, replace = TRUE)
+
+
+# Print choices
+
+data.frame(choices)
+
+```
+
+As we can see, `r length(choices[choices == "Coffee"])` of our guests have chosen coffee, `r length(choices[choices == "Tea"])` have chosen tea, and `r length(choices[choices == "Hot Chocolate"])` have chosen hot chocolate.
+
+I most often see people create dummies using the `ifelse()` function. Given an input (say that the choice is coffee), `ifelse()` produces two outputs: one if the input is true and one if it's false. Let's see what happens:
+
+```{r ifelse}
+
+# Use ifelse to create a caffeinated drink dummy
+
+caff_ifelse <- 
+  ifelse(
+    choices %in% c("Coffee", "Tea"),
+    1,
+    0
+  )
+
+
+# Print choices
+
+data.frame(choices, caff_ifelse)
+
+```
+
+Everything looks good. All the caffeinated drinks have got a value of 1 and the non-caffeinated one has a value of 0. But things aren't so great when we introduce missingness to the data. And this is important, because missingness is a fundamental feature of most real-world data. For example:
+
+```{r ifelse-missing}
+
+# Mark first case of "Hot Chocolate" as missing
+
+choices_miss <- choices
+choices_miss[choices_miss == "Hot Chocolate"][1] <- NA
+
+
+# Use ifelse to create a caffeinated drink dummy
+
+caff_ifelse_miss <- 
+  ifelse(
+    choices_miss %in% c("Coffee", "Tea"),
+    1,
+    0
+  )
+
+
+# Print choices
+
+data.frame(choices_miss, caff_ifelse_miss)
+
+```
+
+Look at row `r which(is.na(choices_miss) == T)` of the data. Despite the input vector including some missingness, the output dummy vector *does not* reflect this missingness. This is because it's a lot more logical than we are. Technically, a missing value *is not* the same as choosing either coffee or tea. But what we tend to want in practice is for our dummy to reflect any missingess present in the input data.
+
+On top of all of this, it's sometimes nice to recode the dummy variable into a factor variable that provides us with some information about what the categories even mean. This is especially useful when it comes to using the variable in a model, as common functions like `lm()` treat discrete and continuous data differently and these differences often propagate through into plotting functions that other members of the R community have written.
+
+Here's my solution to the problem (included in my [jbmisc package](https://github.com/jackobailey/jbmisc)):
+
+```{r as_dummy}
+
+as_dummy <- 
+  function(
+    x,
+    terms = NULL,
+    factor = F,
+    labels = c("Off", "On")
+    ){
+
+    
+  # Create dummy variable
+
+  x <-
+    ifelse(
+      is.na(x) == T,
+      NA,
+      ifelse(
+        x %in% terms,
+        1,
+        0
+      )
+    )
+
+
+  # Convert to factor if desired
+
+  if(factor == T){
+    x <-
+      factor(
+        x,
+        levels = 0:1,
+        labels = labels
+      )
+  }
+
+
+  # Return x
+
+  return(x)
+
+}
+
+```
+
+My function, `as_dummy()`, deals with creating the dummy, missing data, and converting the dummy to a factor in one go. You pass it a vector of data (`x`), tell it what terms you want to mark as 1 (`terms`), then tell it if you want the output vector to be a factor (`factor = T/F`) and, if so, what the labels should be (here the defaults are `labels = c("Off", "On")`).
+
+Let's go back to our toy example and try to solve the problem using `as_dummy()`. For argument's sake, let's also assume that we want our output to be a factor:
+
+```{r as_dummy-example}
+
+# Use as_dummy() to create a caffeinated drink dummy
+
+caff_as_dummy <- 
+  as_dummy(
+    choices_miss,
+    terms = c("Coffee", "Tea"),
+    factor = T,
+    labels = c("Non-caffeinated", "Caffeinated")
+  )
+
+
+# Print choices
+
+data.frame(choices_miss, caff_as_dummy)
+
+```
+
+Nice! Looks like it works. The dummy is coded correctly into caffeinated and non-caffeinated drinks, the missingeness in the input vector is respected, and the output dummy is a nicely-labelled factor ready for including in an analysis.
+
+Like I said at the start of this post, I use this function all the time. Hopefully it will save you some time too. If you have any ideas of how to improve it or make it more efficient, feel free to shoot me a message [on Twitter](https://www.twitter.com/PoliSciJack)!
