@@ -1,0 +1,18 @@
+---
+title: It's weird that no one ever talks about how much higher college dropout is
+  in the US than Britain
+author: "Jonathan Mellon"
+date: "09/12/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+https://nscresearchcenter.org/signaturereport11/
+
+https://www.researchcghe.org/publications/working-paper/english-and-american-higher-education-access-and-completion-policy-regimes-similarities-differences-and-possible-lessons/
+
+
+https://www.hepi.ac.uk/wp-content/uploads/2021/01/A-short-guide-to-non-continuation-in-UK-universities.pdf
