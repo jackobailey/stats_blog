@@ -1,30 +1,54 @@
 ---
-title: "Proving the selection weight ratio minimum"
+title: "Attempting to Prove that the Minimum Ratio of the Final Weight to the Selection Selection Weight is the Survey Response Rate"
 author: "Jonathan Mellon"
 date: "13/12/2021"
-output: html_document
-categories: ["R Markdown", "post-stratification", "response rate", "surveys", "weighting", "raking"]
-tags: ["R Markdown", "post-stratification", "response rate", "surveys", "weighting", "raking"]
-math: true
+output:
+  word_document: default
+  html_document: default
+  pdf_document: default
+categories:
+- R Markdown
+- post-stratification
+- response rate
+- surveys
+- weighting
+- raking
+tags:
+- R Markdown
+- post-stratification
+- response rate
+- surveys
+- weighting
+- raking
+- stream of consciousness
+math: yes
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-In my [previous post](https://www.filedrawer.blog/post/minimum-post-strat-weight-is-response-rate/) I showed that the minimum inverse-probability weight in a simple random sample should be equal to the response rate of the survey. However, simple random samples are basically non-existent in the real world, so I need to work out the equivalent constraint for complex survey designs. 
+In my [previous post](https://www.filedrawer.blog/post/minimum-post-strat-weight-is-response-rate/) I showed that the minimum inverse-probability weight in a simple random sample should be equal to the response rate of the survey. However, simple random samples are basically non-existent in the real world, so I need to work out the equivalent constraint for complex survey designs.
 
-In that post I speculated that the constraint for $i$'s weight should be:
+This post summarizes my progress so far towards doing that. 
+
+In the previous post I speculated that the constraint for $i$'s weight should be:
 
 $$
-\frac{FinalWeight_i}{SelectionWeight_i} > RR_{total}
+\frac{FinalWeight_i}{SelectionWeight_i} >= RR_{total}
 $$
 
-After an hour of failing to write out an analytic proof, I thought it would be worth doing a simulation to see whether this claim is at least empirically true.
+tl;dr that constraint is close but not exactly correct. I think I have now identified the correct constraint, but I haven't yet proved it. 
 
-So let's do a simple two-stage sample where households are randomly selected, then a respondent is randomly selected from that household. Rich people respond at 100% and poor people respond at 30%. This means that 
+# Does it work in practice?
 
-```{r}
+After an hour of failing to work out an analytic proof, I thought it would be worth doing a simulation to see whether the claim is at least empirically true.
+
+So let's do a simple two-stage sample where households are randomly selected, then a respondent is randomly selected from that household.  This means that people in larger households have a lower probability of selection. If you live alone there's a 100% chance of selection conditional on your household being selected, whereas if you live in a two-person household your selection probability is only 50%.
+
+Conditional on being selected for the survey, rich people respond at 100% and poor people respond at 30%. 
+
+```{r, echo = F}
 options(scipen=9999)
 
 
@@ -82,7 +106,7 @@ simRR <- function(pop.n, poor.rr, rich.rr, sample.n, big.hh.rich = F) {
 output <- simRR(pop.n = 10000, poor.rr = 0.3, rich.rr = 1, sample.n = 1000, big.hh.rich = F)
 ```
 
-So after simulating that I look at the response rate for the simulation `r round(output$actual.rr, 3)` and the minimum value of the ratios of the final true weight to the selection weight `r round(min(output$ratios), 3)`. Not far off, but not identical to the response rate. So, it looks like my initial claim is on the right track but not exactly right. 
+So after simulating that, I look at the response rate for the simulation (`r round(output$actual.rr, 3)`) and the minimum value of the ratios of the final true weight to the selection weight (`r round(min(output$ratios), 3)`). Not far off, but also not identical to each other. So, it looks like my initial guess about the constraint might be on the right track but not exactly right. 
 
 Let's try this a few more times and see whether it's robust. 
 
@@ -100,21 +124,17 @@ ggplot(sims, aes(x = rr, y = ratio)) + geom_point() + geom_abline() + theme_mini
 
 After 100 simulations, it's clear there's a very strong relationship, but this isn't an exact match.
 
-OK, so what's going on with those ratios? The mean of the scaled inverse-probability weights is always exactly 1 in the simulation.
+OK, so what's going on with those ratios? The mean of the scaled inverse-probability weights is always exactly 1 in the simulation and the mean of the scaled selection weights is always 1 to 10 decimal places (probably a floating point problem).
 
 ```{r, include = F}
 all(sapply(output2, function(x) mean(x$scaled.weights))==1)
 ```
-```{r, include = F}
-all(sapply(output2, function(x) mean(x$scaled.weights))==1)
-```
-
-Strangely, R doesn't think the mean of the scaled selection weights is always exactly 1, although if you round to 10 decimal places it does, so this is probably a floating point problem. 
 
 ```{r, include = F}
 all(round(sapply(output2, function(x) mean(x$scaled.selection.weights)), 10)==1)
 ```
-However, the ratios themselves are not always this close to zero. In fact on average, they are `r round(mean(abs(sapply(output2, function(x) mean(x$ratios))-1)), 4)` away from zero. But do we actually expect these ratios to be near one on average? If I simulate two random vectors and rescale them to both have a mean of 1, the average ratio of them isn't usually anywhere near 1. 
+
+However, the ratios themselves are not always this close to one. In fact, on average, they are `r round(mean(abs(sapply(output2, function(x) mean(x$ratios))-1)), 4)` away from 1. But should we actually expect these ratios to be near one on average? If I simulate two random vectors and rescale them to both have a mean of 1, the average ratio of them isn't usually anywhere near 1.
 
 ```{r}
 set.seed(1298)
@@ -124,21 +144,23 @@ A <- A / mean(A)
 B <- B / mean(B)
 mean(A/B)
 ```
-OK well what if I rescale the ratios so that they actually have a mean of 1 rather than just being close to that? 
 
-```{r}
+OK, well what if I rescale the ratios so that they *actually* have a mean of 1 rather than just being close to that? 
+
+```{r, echo = F}
 ggplot(sims, aes(x = rr, y = ratioadj)) + geom_point() + geom_abline()+ 
   xlab("Simulation response rate") + 
-  ylab("Final weight divided by selection weight after rescaling") + 
+  ylab("Final weight divided by selection weight (rescaling applied)") + 
   theme_minimal()
 ```
-Apparently, that nails the minimum exactly. The mean absolute difference between this adjusted ratio and the response rate for the survey is just `r as.character(mean(abs(sims$rr - sims$ratioadj)))`. At that point I'm willing to believe any remaining differences are just about double precision. 
 
-But why does this work? 🤷
+Apparently, that nails the minimum weight exactly. The mean absolute difference between this adjusted ratio and the response rate for the survey is just `r as.character(mean(abs(sims$rr - sims$ratioadj)))`. At that point I'm willing to believe any remaining differences are just about floating point precision.
 
-OK well first of all, let's make sure this actually holds up in a more complex simulation. I'll set the poor response rate to 40% and say that people in bigger households are more likely to be rich (so that we have a correlation between selection probability and group response rates). 
+# Does this work with different simulation parameters?
 
-```{r}
+First of all, let's make sure this actually holds up in a more complex simulation. I'll set the poor response rate to 40% and say that people in bigger households are more likely to be rich (so that we have a correlation between selection probability and group response rates). 
+
+```{r, include = F}
 output3 <- replicate(100, simRR(pop.n = 10000, poor.rr = 0.4, 
                                 rich.rr = 1, sample.n = 1000, big.hh.rich = T), simplify = F)
 library(ggplot2)
@@ -147,16 +169,38 @@ sims3 <- data.frame(ratio = sapply(output3, function(x) min(x$ratios)),
            ratioadj = sapply(output3, function(x) min(x$ratios3)))
 ```
 
-Apparently this fix still works and the adjusted ratios exactly match the response rate. 
+Apparently everything still works and the adjusted ratios exactly match the response rate. 
 
-```{r}
+```{r, echo  = F}
 ggplot(sims3, aes(x = rr, y = ratioadj)) + geom_point() + geom_abline()+ 
   xlab("Simulation response rate") + 
-  ylab("Final weight divided by selection weight after rescaling") + 
+  ylab("Final weight divided by selection weight (rescaling applied)") + 
   theme_minimal()
 ```
 
-So to formalize, it looks like the constraint works as follows. For each respondent, $j$, define:
+What about if I make the population 10 times larger?
+
+```{r, include = F}
+output4 <- replicate(20, simRR(pop.n = 100000, poor.rr = 0.4, 
+                                rich.rr = 1, sample.n = 1000, big.hh.rich = T), simplify = F)
+library(ggplot2)
+sims4 <- data.frame(ratio = sapply(output4, function(x) min(x$ratios)), 
+           rr = sapply(output4, function(x) min(x$actual.rr)),
+           ratioadj = sapply(output4, function(x) min(x$ratios3)))
+```
+
+Apparently this still works too:
+
+```{r, echo = F}
+ggplot(sims4, aes(x = rr, y = ratioadj)) + geom_point() + geom_abline()+ 
+  xlab("Simulation response rate") + 
+  ylab("Final weight divided by selection weight (rescaling applied)") + 
+  theme_minimal()
+```
+
+# Summarizing the claim
+
+So to formalize, the constraint is as follows. For each respondent, $j$, define:
 
 $$
 r_j = \frac{FinalWeight_j}{SelectionWeight_j}
@@ -168,8 +212,12 @@ $$
 r^{*}_j = \frac{r_j}{\bar{r}}
 $$
 Based on my simulations, it appears that:
+
 $$
 r^{*}_{j}>= RR_{total}
 $$
 
+# But why does this work?
+
+🤷
 
