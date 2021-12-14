@@ -1,7 +1,7 @@
 ---
 title: "Farage's Brexit Party Announcement and the 2019 Campaign"
 author: "Jack Bailey"
-date: 2020-12-10T21:12:06-05:00
+date: 2021-12-10T21:12:06-05:00
 categories: ["nigel farage", "brexit party", "GE 2019"]
 tags: ["nigel farage", "brexit party", "GE 2019"]
 ---
