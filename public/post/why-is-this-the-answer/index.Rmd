@@ -1,20 +1,14 @@
 ---
 title: "Why is this the answer?"
 author: "Jonathan Mellon"
-date: "13/12/2021"
-output:
-  word_document: default
-  html_document: default
-  pdf_document: default
+date: 2021-12-01T21:13:14-05:00
 categories:
-- R Markdown
 - post-stratification
 - response rate
 - surveys
 - weighting
 - raking
 tags:
-- R Markdown
 - post-stratification
 - response rate
 - surveys
