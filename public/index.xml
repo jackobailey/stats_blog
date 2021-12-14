@@ -46,16 +46,5 @@ How differential nonresponse ruins the law of large numbersRandom samples have 
       <description>This blog has three authors: Jack Bailey, Jon Mellon, and Chris Prosser. We&amp;rsquo;re colleagues on the British Election Study, though the blog is not affiliated with the BES. Instead, it&amp;rsquo;s a place for us to share small insights that we&amp;rsquo;ve come across in our day-to-day work. Some of these insights will be about statistics, some will be about politics, and some will be miscellaneous. But all come with an important health warning: they might be wrong and are always subject to revision.</description>
     </item>
     
-    <item>
-      <title>Why is this the answer?</title>
-      <link>https://filedrawer.blog/post/why-is-this-the-answer/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>https://filedrawer.blog/post/why-is-this-the-answer/</guid>
-      <description>In my previous post I showed that the minimum inverse-probability weight in a simple random sample should be equal to the response rate of the survey. However, since simple random samples are basically non-existent in the real world, I need to work out the equivalent constraint for complex survey designs.
-This post summarizes my progress so far towards doing that.
-In the previous post I speculated that the constraint for \(i\)’s weight should be:</description>
-    </item>
-    
   </channel>
 </rss>
