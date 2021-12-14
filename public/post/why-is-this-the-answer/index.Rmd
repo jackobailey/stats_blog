@@ -1,7 +1,7 @@
 ---
 title: "Why is this the answer?"
 author: "Jonathan Mellon"
-date: 2021-12-01T21:13:14-05:00
+date: 2021-12-13T21:10:14-05:00
 categories:
 - post-stratification
 - response rate
