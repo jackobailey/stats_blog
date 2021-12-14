@@ -3,9 +3,7 @@ title: "Why is this the answer?"
 author: "Jonathan Mellon"
 date: 2021-12-14T21:00:14-05:00
 output:
-  word_document: default
   html_document: default
-  pdf_document: default
 categories:
 - R Markdown
 - post-stratification
@@ -21,7 +19,7 @@ tags:
 - weighting
 - raking
 - stream of consciousness
-math: yes
+math: true
 ---
 
 ```{r setup, include=FALSE}
