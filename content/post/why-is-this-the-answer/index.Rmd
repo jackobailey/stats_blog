@@ -17,7 +17,7 @@ tags:
 - weighting
 - raking
 - stream of consciousness
-math: yes
+math: true
 ---
 
 ```{r setup, include=FALSE}
