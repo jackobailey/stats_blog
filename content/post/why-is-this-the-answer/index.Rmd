@@ -2,8 +2,6 @@
 title: "Why is this the answer?"
 author: "Jonathan Mellon"
 date: 2021-12-14T21:00:14-05:00
-output:
-  html_document: default
 categories: ["post-stratification", "response rate", "surveys", "weighting", "raking"]
 tags: ["post-stratification", "response rate", "surveys", "weighting", "raking", "stream of consciousness"]
 math: true

@@ -6,19 +6,15 @@
     <description>Recent content in surveys on The File Drawer</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 01 Dec 2020 21:13:14 -0500</lastBuildDate><atom:link href="https://filedrawer.blog/tags/surveys/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Wed, 01 Dec 2021 21:13:14 -0500</lastBuildDate><atom:link href="https://filedrawer.blog/tags/surveys/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>The minimum post-stratification weight in a simple-random-sample equals the response rate</title>
       <link>https://filedrawer.blog/post/minimum-post-strat-weight-is-response-rate/</link>
-      <pubDate>Tue, 01 Dec 2020 21:13:14 -0500</pubDate>
+      <pubDate>Wed, 01 Dec 2021 21:13:14 -0500</pubDate>
       
       <guid>https://filedrawer.blog/post/minimum-post-strat-weight-is-response-rate/</guid>
       <description>As my first post on the File Drawer, I wanted to share a survey statistics result that surprised me and that I haven’t seen derived before. At the very least, I know that this result is not used in any applied weighting work that I’ve seen.
-<<<<<<< HEAD
 How differential nonresponse ruins the law of large numbersRandom samples have fantastic statistical properties. As the sample size increases, the law of large numbers guarantees that your estimate will converge on the true population value.</description>
-=======
-How differential nonresponse ruins the law of large numbers Random samples have fantastic statistical properties. As the sample size increases, the law of large numbers guarantees that your estimate will converge on the true population value.</description>
->>>>>>> master
     </item>
     
   </channel>
