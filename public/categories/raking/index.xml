@@ -17,16 +17,5 @@
 How differential nonresponse ruins the law of large numbersRandom samples have fantastic statistical properties. As the sample size increases, the law of large numbers guarantees that your estimate will converge on the true population value.</description>
     </item>
     
-    <item>
-      <title>Why is this the answer?</title>
-      <link>https://filedrawer.blog/post/why-is-this-the-answer/</link>
-      <pubDate>Wed, 01 Dec 2021 21:13:14 -0500</pubDate>
-      
-      <guid>https://filedrawer.blog/post/why-is-this-the-answer/</guid>
-      <description>In my previous post I showed that the minimum inverse-probability weight in a simple random sample should be equal to the response rate of the survey. However, since simple random samples are basically non-existent in the real world, I need to work out the equivalent constraint for complex survey designs.
-This post summarizes my progress so far towards doing that.
-In the previous post I speculated that the constraint for \(i\)’s weight should be:</description>
-    </item>
-    
   </channel>
 </rss>
