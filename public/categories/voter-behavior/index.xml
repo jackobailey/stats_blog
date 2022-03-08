@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>voter behavior on The File Drawer</title>
+    <link>https://filedrawer.blog/categories/voter-behavior/</link>
+    <description>Recent content in voter behavior on The File Drawer</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Mon, 07 Mar 2022 00:00:00 +0000</lastBuildDate><atom:link href="https://filedrawer.blog/categories/voter-behavior/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Do some parties need to mobilize the base to win elections?</title>
+      <link>https://filedrawer.blog/post/parties-mobilize-win/</link>
+      <pubDate>Mon, 07 Mar 2022 00:00:00 +0000</pubDate>
+      
+      <guid>https://filedrawer.blog/post/parties-mobilize-win/</guid>
+      <description>I recently posted a working paper showing how to decompose overall volatility in election results into party switching, turnout switching and population replacement. I showed that across 104 election pairs, party switching was the most important factor for electoral change in 97% of cases. This flies in the face of a lot of conventional wisdom that there are no swing voters and that elections are won by energizing the base.</description>
+    </item>
+    
+  </channel>
+</rss>

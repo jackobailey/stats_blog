@@ -6,11 +6,11 @@
     <description>Recent content in surveys on The File Drawer</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 13 Dec 2021 21:10:14 -0500</lastBuildDate><atom:link href="https://filedrawer.blog/tags/surveys/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Mon, 13 Dec 2021 21:13:14 -0500</lastBuildDate><atom:link href="https://filedrawer.blog/tags/surveys/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Why is this the answer?</title>
       <link>https://filedrawer.blog/post/why-is-this-the-answer/</link>
-      <pubDate>Mon, 13 Dec 2021 21:10:14 -0500</pubDate>
+      <pubDate>Mon, 13 Dec 2021 21:13:14 -0500</pubDate>
       
       <guid>https://filedrawer.blog/post/why-is-this-the-answer/</guid>
       <description>In my previous post I showed that the minimum inverse-probability weight in a simple random sample should be equal to the response rate of the survey. However, since simple random samples are basically non-existent in the real world, I need to work out the equivalent constraint for complex survey designs.

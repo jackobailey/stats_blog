@@ -1,0 +1,17 @@
+---
+title: Someone should study: Lithium and Political Behavior
+author: "Jonathan Mellon"
+date: 2020-12-01T21:13:14-05:00
+categories: ["R Markdown", "post-stratification", "response rate", "surveys", "weighting", "raking"]
+tags: ["R Markdown", "post-stratification", "response rate", "surveys", "weighting", "raking"]
+math: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+Every now and again I have a paper idea that's way too far outside of my own research area but that I'd love to see the results of. So I'm going to list some of these in the hope that someone does the research and I can find out the answer in an ongoing series called: *someone should study*. 
+
+Lithium was discovered to be an effective mood stabiliser in the mid-20th century and is still widely used as an anti-depressant for people who haven't had success with other medication. This naturally got scientists wondering  whether natural exposure to lithium might have public health effects on mental illness and particularly on suicide. 
+There are a [whole](https://www.sciencedirect.com/science/article/pii/S002239561200372X) [series](https://www.cambridge.org/core/journals/the-british-journal-of-psychiatry/article/lithium-levels-in-drinking-water-and-risk-of-suicide/7C18AC894A0141D3D89B27282AF35DB2) of studies looking at the naturally occuring level of lithium in water supplies and how this relates to suicide rates 
