@@ -1,0 +1,209 @@
+---
+title: "Do some parties need to mobilize the base to win elections?"
+author: "Jon Mellon"
+date: '2022-03-07'
+math: true
+categories: ["voter behavior", "methods", "electoral change"]
+tags: ["voter behavior", "methods", "electoral change", "decomposition"]
+output:
+ bookdown::html_document2:
+  latex_engine: xelatex
+  keep_tex: true
+  toc: false
+ bookdown::pdf_document2:
+  latex_engine: xelatex
+  keep_tex: true
+  toc: false
+ bookdown::word_document2:
+  latex_engine: xelatex
+  keep_tex: true
+always_allow_html: true
+---
+
+<script src="{{< blogdown/postref >}}index_files/header-attrs/header-attrs.js"></script>
+
+
+<p>I recently posted a <a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3957460">working paper</a> showing how to decompose overall volatility in election results into party switching, turnout switching and population replacement. I showed that across 104 election pairs, party switching was the most important factor for electoral change in 97% of cases. This flies in the face of a lot of conventional wisdom that <a href="https://www.politico.com/news/magazine/2020/02/06/rachel-bitecofer-profile-election-forecasting-new-theory-108944">there are no swing voters</a> and that elections are won by <a href="https://newrepublic.com/article/153939/democrats-victory-not-depend-swing-voters">energizing the base</a>.</p>
+<p>But there was one remaining possibility that I wanted to address. OK, perhaps turnout isn’t the main driver of electoral change in general, but what if it’s really important for some parties? Perhaps the fate of parties that rely on lower turnout demographic groups is driven more by turnout switching?</p>
+<p>So this raised the question, how can I take a change in one party’s vote share between two elections and split it into the parts attributable to party switching, turnout switching, and population replacement?</p>
+<p>The obvious answer would simply be to look at net flows. If a party gains 10,000 previous non-voters and loses 5,000 of its previous voters to non-voting, they have a net gain of 5,000 newly mobilized voters. But I think this gives a misleading picture of non-voting’s importance. If your party gains a net 5,000 newly mobilized voters but all the other parties’ gain 20,000, it’s possible that your party’s share of the vote has actually fallen due to turnout switching because the denominator of all voters has increased faster than your number of votes. By contrast, recruiting a net 5,000 voters from another party directly increases your party’s vote share without affecting the denominator.</p>
+<p>I couldn’t find an existing decomposition of changing vote shares that really addressed this, so I’ve created a new one. I’d be interested if anyone knows if this decomposition of a changing proportion exists anywhere else already. I use it for vote share changes here but it looks like it would be very widely applicable.</p>
+<div id="decomposing-mean-changes" class="section level1">
+<h1>Decomposing mean changes</h1>
+<p>Suppose we observe a mean <span class="math inline">\(P\)</span> at two discrete times. A mean can be expressed as a numerator <span class="math inline">\(n\)</span> divided by a denominator <span class="math inline">\(d\)</span>. We can define the change in the mean as follows:</p>
+<p><span class="math display">\[
+P_{\Delta} = P_2 - P_1 = \frac{n_2}{d_2} - \frac{n_1}{d_1} \\
+\]</span></p>
+<p>For the rest of this paper, we talk about the example of a population proportion, but this decomposition would work for any ratio statistic.</p>
+<p>Now let’s suppose all changes in the numerator and denominator between the two timepoints are categorized exclusively into either type A or type B so that:</p>
+<p><span class="math display">\[
+P_{ \Delta } = \frac{ n_1 + n_{ \Delta A} + n_{ \Delta B } }{ d_1 + d_{ \Delta A } + d_{ \Delta B } }  - \frac{ n_1 }{ d_1 } = \frac{n_1 + n_{\Delta A} + n_{\Delta B} }{ d_2}  - \frac{n_1}{d_1}
+\]</span></p>
+<p>Perhaps A is the entries into a population and B is the exits (and the existing population members do not change). Or A might just be the net effect of entries and exits from the population and B might be change within existing population members (in which case B would not affect the denominator).</p>
+<p>We want to be able to partition the overall change <span class="math inline">\(P_{\Delta}\)</span> into the change attributable to A and B.</p>
+<p><span class="math display">\[
+P_{\Delta} = P_{\Delta A} + P_{\Delta B}
+\]</span></p>
+<p>We start by defining <span class="math inline">\(n_{\Delta A 0}\)</span> as the A numerator required to not affect the numerator-denominator ratio from <span class="math inline">\(P_1\)</span> given the observed A denominator changes <span class="math inline">\(d_{\Delta A}\)</span>:</p>
+<p><span class="math display">\[
+\frac{n_{\Delta A 0}}{d_{\Delta A}} = \frac{n_1}{d_1}
+\]</span></p>
+<p>Rearranging gives us:</p>
+<p><span class="math display">\[
+n_{\Delta A 0} = n_1 \cdot \frac{ d_{\Delta A}}{d_1}
+\]</span></p>
+<p>We then define <span class="math inline">\(n_{\Delta A \epsilon}\)</span> as the difference between the numerator change to keep the proportion constant(<span class="math inline">\(n_{\Delta A 0}\)</span>) and the numerator change observed (<span class="math inline">\(n_{\Delta A }\)</span>):</p>
+<p><span class="math display">\[
+n_{\Delta A \epsilon} = n_{\Delta A } - n_{\Delta A 0}
+\]</span></p>
+<p>Using the equivalent identities for B, we can rewrite <span class="math inline">\(P_{\Delta}\)</span> as:</p>
+<p><span class="math display">\[
+P_{\Delta} =  \frac{n_1 }{ d_2}  + \frac{n_{\Delta A 0} + n_{\Delta A \epsilon}   }{ d_2} + \frac{n_{\Delta B 0} + n_{\Delta B \epsilon} }{ d_2}  - \frac{n_1}{d_1} \\
+\]</span></p>
+<p>and then:</p>
+<p><span class="math display">\[
+P_{\Delta} =  \frac{n_1 + n_{\Delta A 0} + n_{\Delta B 0}}{ d_1+ d_{\Delta A} + d_{\Delta B}}  + \frac{n_{\Delta A \epsilon}   }{ d_2} + \frac{n_{\Delta B \epsilon} }{ d_2}  - \frac{n_1}{d_1} \\
+\]</span></p>
+<p>Since we defined <span class="math inline">\(n_{\Delta A 0}\)</span> to maintain <span class="math inline">\(\frac{n_{\Delta A 0}}{d_{\Delta A}}=\frac{n_1}{d_1}\)</span>, it follows that:</p>
+<p><span class="math display">\[
+\frac{n_1 + n_{\Delta A 0} + n_{\Delta B 0}}{ d_1+ d_{\Delta A} + d_{\Delta B}}  = \frac{n_1}{d_1}
+\]</span></p>
+<p>which allows the following simplification:</p>
+<p><span class="math display">\[
+P_{\Delta} = \frac{n_{\Delta A \epsilon}   }{ d_2} + \frac{n_{\Delta B \epsilon} }{ d_2} \\
+\]</span></p>
+<p>where we have now partitioned <span class="math inline">\(P_{ \Delta}\)</span> into parts attributable to A and B. Substituting in observed variables gives us:</p>
+<p><span class="math display">\[\begin{equation}
+\label{finaldecomp}
+P_{\Delta} = \frac{n_{\Delta A } - \big ( n_1 \cdot \frac{ d_{\Delta A}}{d_1} \big )   }{ d_2} + \frac{n_{\Delta B } - \big ( n_1 \cdot \frac{ d_{\Delta B}}{d_1} \big )}{ d_2} \\
+\end{equation}\]</span></p>
+<p>So we can now define the two additive components of change:</p>
+<p><span class="math display">\[
+P_{\Delta A} = \frac{n_{\Delta A } - (n_1 \cdot \frac{ d_{\Delta A}}{d_1})   }{ d_2} \\
+\]</span></p>
+<p><span class="math display">\[
+P_{\Delta B} = \frac{n_{\Delta B } - (n_1 \cdot \frac{ d_{\Delta B}}{d_1})   }{ d_2} \\
+\]</span></p>
+<p>This decomposition can be applied again to the change components themselves so that we might for instance decompose the A changes further to:</p>
+<p><span class="math display">\[P_{\Delta A} = P_{\Delta C} +  P_{\Delta D}=\frac{n_{\Delta C } - (n_1 \cdot \frac{ d_{\Delta C}}{d_1})   }{ d_2} + \frac{n_{\Delta D } - (n_1 \cdot \frac{ d_{\Delta D}}{d_1})   }{ d_2}\]</span></p>
+<p>To show a quick example, let’s imagine we have a group of 80 people, 40 of whom are women. By the next time point, 10 people leave, 6 of whom are women. In addition, 110 new people join the group but only 11 of these are women. We go from a 50% female group to 25% by the second timepoint a change in the proportion of -0.25.</p>
+<p>When we substitute in these numbers to equation <a href="#eq:finaldecomp">(<strong>??</strong>)</a> we get:</p>
+<p><span class="math display">\[
+P_{\Delta} = \frac{-6 - \big ( 40 \cdot \frac{-10}{80} \big )   }{ 180} + \frac{11 - \big ( 40 \cdot \frac{110}{80} \big )}{ 180} \\
+\]</span></p>
+<p><span class="math display">\[
+P_{\Delta} = \frac{-1}{ 180} + \frac{-44}{ 180} = -0.0055 + -0.2444 \\
+\]</span>
+In other words, the overall -0.25 in the proportion of women is able to be decomposed into a -0.0055 effect from differential exits and a much larger -0.244 from differential entries.</p>
+<div style="page-break-after: always;"></div>
+</div>
+<div id="decomposing-changes-in-parties-vote-shares" class="section level1">
+<h1>Decomposing changes in parties’ vote shares</h1>
+<p>Now we can consider how to decompose a change in a party’s vote share <span class="math inline">\(V_{\Delta}\)</span> into the contributions from voters switching parties (<span class="math inline">\(V_{\Delta vote}\)</span>), switching to or from non-voting (<span class="math inline">\(V_{\Delta DNV}\)</span>), and population replacement (<span class="math inline">\(V_{\Delta pop}\)</span>).</p>
+<p><span class="math display">\[\begin{equation}
+\label{votedecomp}
+V_{\Delta} = \frac{n_{\Delta vote } - \big ( n_1 \cdot \frac{ d_{\Delta vote}}{d_1} \big )   }{ d_2} + \frac{n_{\Delta DNV } - \big ( n_1 \cdot \frac{ d_{\Delta DNV}}{d_1} \big )}{ d_2}  + \frac{n_{\Delta pop } - \big ( n_1 \cdot \frac{ d_{\Delta pop}}{d_1} \big )}{ d_2}   \\
+\end{equation}\]</span></p>
+<p>Let’s imagine we want to decompose a change in party A’s vote share between two elections. In election 1, party A gets 40% of the vote and the other parties get a combined 60%. Turnout is 50%. In election 2, party A gets 50% of the vote, a 10 percentage point increase in A’s share. Turnout increases to 80% (a 30 percentage point increase).</p>
+<p>Table <a href="#tab:simpletranstable">1</a> shows the transition table for this example. I show the table as counts here, but it would work equally well with proportions of people in each cell.</p>
+<table>
+<caption><span id="tab:simpletranstable">Table 1: </span>Transition table for hypothetical example showing counts of people in the population. Rows show vote choices of individuals at the first election and columns show vote choices at the second election.</caption>
+<thead>
+<tr class="header">
+<th align="left"></th>
+<th align="left">A</th>
+<th align="left">Other</th>
+<th align="left">DNV</th>
+<th align="left">Dead</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">A</td>
+<td align="left">1,318,916</td>
+<td align="left">358,207</td>
+<td align="left">90,604</td>
+<td align="left">132,273</td>
+</tr>
+<tr class="even">
+<td align="left">Other</td>
+<td align="left">721,284</td>
+<td align="left">1,763,057</td>
+<td align="left">148,648</td>
+<td align="left">217,011</td>
+</tr>
+<tr class="odd">
+<td align="left">DNV</td>
+<td align="left">1,602,996</td>
+<td align="left">1,550,975</td>
+<td align="left">1,445,313</td>
+<td align="left">150,716</td>
+</tr>
+<tr class="even">
+<td align="left">Ineligible</td>
+<td align="left">156,804</td>
+<td align="left">127,760</td>
+<td align="left">215,436</td>
+<td align="left">0</td>
+</tr>
+</tbody>
+</table>
+<div id="defining-the-numerators-and-denominators" class="section level2">
+<h2>Defining the numerators and denominators</h2>
+<p>The change in the numerator for the party switching component is the number of people switching to party A minus the number switching from party A to another party. <span class="math inline">\(M\)</span> is the transition matrix shown in table <a href="#tab:simpletranstable">1</a>.</p>
+<p><span class="math display">\[
+n_{\Delta vote } =  M[Other,A] - M[A,Other]
+\]</span></p>
+<p>Existing voters switching between parties does not affect the denominator so:</p>
+<p><span class="math display">\[
+d_{\Delta vote}=0
+\]</span>
+therefore:</p>
+<p><span class="math display">\[
+V_{\Delta vote}=\frac{ M[Oth,A] - M[A,Oth] }{ d_2}
+\]</span></p>
+<p>When we substitute in the numbers from the example transition table, we get the following estimate of the party switching component:</p>
+<p><span class="math display">\[
+V_{\Delta vote}=\frac{ 721,284  -  358,207 }{  7,599,999 }= 0.048 \]</span></p>
+<p>The change in the turnout switching component for party A is the number of people switching from non-voting to party A minus the number switching from party A to non-voting:</p>
+<p><span class="math display">\[
+n_{\Delta DNV } =  M[DNV,A] - M[A,DNV]
+\]</span>
+Turnout change can greatly affect the denominator as well, so that component also includes turnout switching to and from other parties</p>
+<p><span class="math display">\[
+d_{\Delta DNV } =  \big ( M[DNV,A] + M[DNV,Oth] \big ) - \big ( M[A,DNV] + M[Oth,DNV] \big )
+\]</span></p>
+<p>the turnout component is therefore defined as:</p>
+<p><span class="math display">\[
+V_{\Delta DNV} = \frac{(M[DNV,A] - M[A,DNV]) - \big ( n_1 \cdot \frac{ \big ( M[DNV,A] + M[DNV,Oth] \big ) - \big ( M[A,DNV] + M[Oth,DNV] \big )}{d_1} \big )}{ d_2}
+\]</span>
+Substituting in the numbers from the example gives:</p>
+<p><span class="math display">\[V_{\Delta DNV} = \frac{(1,602,996 - 90,604) - \big ( 1,900,000\cdot \frac{ \big ( 1,602,996 + 1,550,975 \big ) - \big ( 90,604 + 148,648 \big )}{4,750,000} \big )}{ 7,599,999}=0.046\]</span></p>
+<p>Finally, population replacement’s numerator change is defined as:</p>
+<p><span class="math display">\[
+n_{\Delta pop } =  M[Inelig,A] - M[A,Dead]
+\]</span>
+and the denominator change as:</p>
+<p><span class="math display">\[
+d_{\Delta pop } =   (M[Inelig,A] + M[Inelig,Oth]) - (M[A,Dead] + M[Oth,Dead])
+\]</span></p>
+<p><span class="math display">\[
+V_{\Delta pop}=\frac{M[Inelig,A] - M[A,Dead] - \big ( n_1 \cdot \frac{ (M[Inelig,A] + M[Inelig,Oth]) - (M[A,Dead] + M[Oth,Dead])}{d_1} \big )}{ d_2}
+\]</span></p>
+<p><span class="math display">\[V_{\Delta pop} = \frac{(156,804 - 132,273) - \big ( 1,900,000\cdot \frac{ \big ( 156,804 + 127,760 \big ) - \big ( 132,273 + 217,011 \big )}{4,750,000} \big )}{ 7,599,999}=0.007\]</span></p>
+<p>The 10 percentage point increase in A’s vote share therefore decomposes into 4.78 percentage points from party switching, 4.56 percentage points from turnout switching, and 0.66 percentage points from population replacement.</p>
+<p>In this case, the components all increased A’s vote share but it would also be possible for components to partially cancel out.</p>
+</div>
+</div>
+<div id="applying-this-to-real-data" class="section level1">
+<h1>Applying this to real data</h1>
+<p>So what happens when I apply this to the 664 party-election observations in the data? Party switching is a larger contributor to changes in party vote shares 78% of the time, meaning that party switching is more important for most parties as well as most elections.</p>
+<p>But maybe certain types of parties rely more on turnout? The following graph shows that’s not the case. Higher numbers on this graph indicate that party switching contributed more to change than turnout switching. On average, parties in <strong>every family</strong> (e.g. conservative, social democrat, christian democrat, radical right etc) in <strong>all 18 countries</strong> is more affected by party switching than turnout switching.</p>
+<div class="figure"><span style="display:block;" id="fig:relimp"></span>
+<img src="{{< blogdown/postref >}}index_files/figure-html/relimp-1.png" alt="Relative importance" width="768" />
+<p class="caption">
+Figure 1: Relative importance
+</p>
+</div>
+<p>So my results continue to show that elections are overwhelmingly won and lost by party switching rather than turnout switching. This is true for parties everywhere on the political spectrum and all around the world.</p>
+</div>

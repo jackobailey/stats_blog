@@ -1,0 +1,449 @@
+---
+title: "Do some parties need to mobilize the base to win elections?"
+author: "Jon Mellon"
+date: '2022-03-07'
+math: true
+categories: ["voter behavior", "methods", "electoral change"]
+tags: ["voter behavior", "methods", "electoral change", "decomposition"]
+output:
+ bookdown::html_document2:
+  latex_engine: xelatex
+  keep_tex: true
+  toc: false
+ bookdown::pdf_document2:
+  latex_engine: xelatex
+  keep_tex: true
+  toc: false
+ bookdown::word_document2:
+  latex_engine: xelatex
+  keep_tex: true
+always_allow_html: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning=FALSE, error=FALSE, message = FALSE)
+options(scipen=9999)
+knitr::opts_knit$set(eval.after = "fig.cap")
+```
+
+```{r}
+# bib <- readLines("comparative.bib")
+# bib <- bib[!grepl("^url =|^doi =", bib)]
+# writeLines(bib, con = "comparativenodoi.bib")
+
+
+
+library(ggplot2)
+library(ggrepel)
+library(scales)
+library(drake)
+
+library(mellonMisc)
+library(reshape2)
+library(dplyr)
+
+dead <- 0.05
+new <- 0.05
+a.sh.e1 <- 0.4
+b.sh.e1 <- 0.6
+turnout.e1 <- 0.5
+
+a.sh.e2 <- 0.5
+b.sh.e2 <- 0.5
+turnout.e2 <- 0.8
+
+e1.res <- c(DNV =  (1-new) * (1-turnout.e1) , Ineligible =  new)
+e1.votes <- 1- sum(e1.res)
+e1.res <- c(A = e1.votes* a.sh.e1, 
+            B = e1.votes* b.sh.e1,
+            e1.res)
+
+e2.res <- c(DNV =  (1-dead) * (1-turnout.e2) , Dead =  dead)
+e2.votes <- 1- sum(e2.res)
+e2.res <- c(A = e2.votes* a.sh.e2, 
+            B = e2.votes* b.sh.e2,
+            e2.res)
+
+tab <- matrix(1/16, nrow = 4, ncol = 4)
+
+tab <- matrix(c(0.15, 0.05,0.01, 0.01, 
+                0.05, 0.15,0.01, 0.01,
+                0.16, 0.19,0.14, 0.01,
+                0.015, 0.015, 0.02, 0),
+              ncol = 4, nrow = 4, 
+              byrow= T)
+
+colnames(tab) <- names(e2.res)
+rownames(tab) <- names(e1.res)
+
+tab <- rakeTable(tab, cs=e2.res, rs = e1.res)
+colnames(tab)[colnames(tab)=="B"] <- "Other"
+rownames(tab)[rownames(tab)=="B"] <- "Other"
+```
+
+I recently posted a [working paper](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3957460) showing how to decompose overall volatility in election results into party switching, turnout switching and population replacement. I showed that across 104 election pairs, party switching was the most important factor for electoral change in 97% of cases. This flies in the face of a lot of conventional wisdom that [there are no swing voters](https://www.politico.com/news/magazine/2020/02/06/rachel-bitecofer-profile-election-forecasting-new-theory-108944) and that elections are won by [energizing the base](https://newrepublic.com/article/153939/democrats-victory-not-depend-swing-voters). 
+
+But there was one remaining possibility that I wanted to address. OK, perhaps turnout isn't the main driver of electoral change in general, but what if it's really important for some parties? Perhaps the fate of parties that rely on lower turnout demographic groups is driven more by turnout switching? 
+
+So this raised the question, how can I take a change in one party's vote share between two elections and split it into the parts attributable to party switching, turnout switching, and population replacement?
+
+The obvious answer would simply be to look at net flows. If a party gains 10,000 previous non-voters and loses 5,000 of its previous voters to non-voting, they have a net gain of 5,000 newly mobilized voters. But I think this gives a misleading picture of non-voting's importance. If your party gains a net 5,000 newly mobilized voters but all the other parties' gain 20,000, it's possible that your party's share of the vote has actually fallen due to turnout switching because the denominator of all voters has increased faster than your number of votes. By contrast, recruiting a net 5,000 voters from another party directly increases your party's vote share without affecting the denominator. 
+
+I couldn't find an existing decomposition of changing vote shares that really addressed this, so I've created a new one. I'd be interested if anyone knows if this decomposition of a changing proportion exists anywhere else already. I use it for vote share changes here but it looks like it would be very widely applicable.
+
+
+# Decomposing mean changes
+
+Suppose we observe a mean $P$ at two discrete times. A mean can be expressed as a numerator $n$ divided by a denominator $d$. We can define the change in the mean as follows:
+
+
+$$
+P_{\Delta} = P_2 - P_1 = \frac{n_2}{d_2} - \frac{n_1}{d_1} \\
+$$
+
+For the rest of this paper, we talk about the example of a population proportion, but this decomposition would work for any ratio statistic. 
+
+Now let's suppose all changes in the numerator and denominator between the two timepoints are categorized exclusively into either type A or type B so that:
+
+
+$$
+P_{ \Delta } = \frac{ n_1 + n_{ \Delta A} + n_{ \Delta B } }{ d_1 + d_{ \Delta A } + d_{ \Delta B } }  - \frac{ n_1 }{ d_1 } = \frac{n_1 + n_{\Delta A} + n_{\Delta B} }{ d_2}  - \frac{n_1}{d_1} 
+$$
+
+
+Perhaps A is the entries into a population and B is the exits (and the existing population members do not change). Or A might just be the net effect of entries and exits from the population and B might be change within existing population members (in which case B would not affect the denominator).
+
+We want to be able to partition the overall change $P_{\Delta}$ into the change attributable to A and B.  
+
+
+$$
+P_{\Delta} = P_{\Delta A} + P_{\Delta B}
+$$
+
+
+We start by defining $n_{\Delta A 0}$ as the A numerator required to not affect the numerator-denominator ratio from $P_1$ given the observed A denominator changes $d_{\Delta A}$:
+
+$$
+\frac{n_{\Delta A 0}}{d_{\Delta A}} = \frac{n_1}{d_1}
+$$
+
+Rearranging gives us:
+
+$$
+n_{\Delta A 0} = n_1 \cdot \frac{ d_{\Delta A}}{d_1} 
+$$
+
+
+We then define $n_{\Delta A \epsilon}$ as the difference between the numerator change to keep the proportion constant($n_{\Delta A 0}$) and the numerator change observed ($n_{\Delta A }$):
+
+
+$$
+n_{\Delta A \epsilon} = n_{\Delta A } - n_{\Delta A 0} 
+$$
+
+
+Using the equivalent identities for B, we can rewrite $P_{\Delta}$ as:
+
+
+$$
+P_{\Delta} =  \frac{n_1 }{ d_2}  + \frac{n_{\Delta A 0} + n_{\Delta A \epsilon}   }{ d_2} + \frac{n_{\Delta B 0} + n_{\Delta B \epsilon} }{ d_2}  - \frac{n_1}{d_1} \\
+$$
+
+and then:
+
+$$
+P_{\Delta} =  \frac{n_1 + n_{\Delta A 0} + n_{\Delta B 0}}{ d_1+ d_{\Delta A} + d_{\Delta B}}  + \frac{n_{\Delta A \epsilon}   }{ d_2} + \frac{n_{\Delta B \epsilon} }{ d_2}  - \frac{n_1}{d_1} \\
+$$
+
+Since we defined $n_{\Delta A 0}$ to maintain $\frac{n_{\Delta A 0}}{d_{\Delta A}}=\frac{n_1}{d_1}$, it follows that:
+
+$$
+\frac{n_1 + n_{\Delta A 0} + n_{\Delta B 0}}{ d_1+ d_{\Delta A} + d_{\Delta B}}  = \frac{n_1}{d_1}
+$$
+
+
+which allows the following simplification:
+
+$$
+P_{\Delta} = \frac{n_{\Delta A \epsilon}   }{ d_2} + \frac{n_{\Delta B \epsilon} }{ d_2} \\
+$$
+
+
+where we have now partitioned $P_{ \Delta}$ into parts attributable to A and B. Substituting in observed variables gives us:
+
+
+\begin{equation}
+\label{finaldecomp}
+P_{\Delta} = \frac{n_{\Delta A } - \big ( n_1 \cdot \frac{ d_{\Delta A}}{d_1} \big )   }{ d_2} + \frac{n_{\Delta B } - \big ( n_1 \cdot \frac{ d_{\Delta B}}{d_1} \big )}{ d_2} \\
+\end{equation}
+
+
+
+So we can now define the two additive components of change:
+
+$$
+P_{\Delta A} = \frac{n_{\Delta A } - (n_1 \cdot \frac{ d_{\Delta A}}{d_1})   }{ d_2} \\
+$$
+
+$$
+P_{\Delta B} = \frac{n_{\Delta B } - (n_1 \cdot \frac{ d_{\Delta B}}{d_1})   }{ d_2} \\
+$$
+
+This decomposition can be applied again to the change components themselves so that we might for instance decompose the A changes further to:
+
+$$P_{\Delta A} = P_{\Delta C} +  P_{\Delta D}=\frac{n_{\Delta C } - (n_1 \cdot \frac{ d_{\Delta C}}{d_1})   }{ d_2} + \frac{n_{\Delta D } - (n_1 \cdot \frac{ d_{\Delta D}}{d_1})   }{ d_2}$$
+
+
+To show a quick example, let's imagine we have a group of 80 people, 40 of whom are women. By the next time point, 10 people leave, 6 of whom are women. In addition, 110 new people join the group but only 11 of these are women. We go from a 50% female group to 25% by the second timepoint a change in the proportion of -0.25. 
+
+When we substitute in these numbers to equation \@ref(eq:finaldecomp) we get:
+
+$$
+P_{\Delta} = \frac{-6 - \big ( 40 \cdot \frac{-10}{80} \big )   }{ 180} + \frac{11 - \big ( 40 \cdot \frac{110}{80} \big )}{ 180} \\
+$$
+
+$$
+P_{\Delta} = \frac{-1}{ 180} + \frac{-44}{ 180} = -0.0055 + -0.2444 \\
+$$
+In other words, the overall -0.25 in the proportion of women is able to be decomposed into a -0.0055 effect from differential exits and a much larger -0.244 from differential entries. 
+
+
+\newpage 
+
+# Decomposing changes in parties' vote shares
+
+Now we can consider how to decompose a change in a party's vote share $V_{\Delta}$ into the contributions from voters switching parties ($V_{\Delta vote}$), switching to or from non-voting ($V_{\Delta DNV}$), and population replacement ($V_{\Delta pop}$).
+
+\begin{equation}
+\label{votedecomp}
+V_{\Delta} = \frac{n_{\Delta vote } - \big ( n_1 \cdot \frac{ d_{\Delta vote}}{d_1} \big )   }{ d_2} + \frac{n_{\Delta DNV } - \big ( n_1 \cdot \frac{ d_{\Delta DNV}}{d_1} \big )}{ d_2}  + \frac{n_{\Delta pop } - \big ( n_1 \cdot \frac{ d_{\Delta pop}}{d_1} \big )}{ d_2}   \\
+\end{equation}
+
+Let's imagine we want to decompose a change in party A's vote share between two elections. In election 1, party A gets `r round(a.sh.e1 * 100)`% of the vote and the other parties get a combined `r round(b.sh.e1 * 100)`%. Turnout is `r round(turnout.e1*100)`%. In election 2, party A gets `r round(a.sh.e2 * 100)`% of the vote, a `r round((a.sh.e2- a.sh.e1 ) * 100)` percentage point increase in A's share. Turnout increases to `r round(turnout.e2*100)`% (a `r round((turnout.e2 - turnout.e1) * 100)` percentage point increase). 
+
+Table \@ref(tab:simpletranstable) shows the transition table for this example. I show the table as counts here, but it would work equally well with proportions of people in each cell. 
+
+```{r simpletranstable, message = FALSE, warning = FALSE}
+library(knitr)
+tab <- round(tab*10000000)
+tabdisp <- tab
+tabdisp[] <- prettyNum(tab, big.mark = ",")
+
+kable(tabdisp,
+      caption = "Transition table for hypothetical example showing counts of people in the population. Rows show vote choices of individuals at the first election and columns show vote choices at the second election.")
+
+```
+
+## Defining the numerators and denominators
+
+
+The change in the numerator for the party switching component is the number of people switching to party A minus the number switching from party A to another party. $M$ is the transition matrix shown in table \@ref(tab:simpletranstable).
+
+$$
+n_{\Delta vote } =  M[Other,A] - M[A,Other]
+$$
+
+Existing voters switching between parties does not affect the denominator so:
+
+$$
+d_{\Delta vote}=0
+$$
+therefore:
+
+$$
+V_{\Delta vote}=\frac{ M[Oth,A] - M[A,Oth] }{ d_2}
+$$
+
+```{r}
+d2 <- sum(tab[, c("A", "Other")])
+d1 <- sum(tab[c("A", "Other"), ])
+n1 <- sum(tab["A", ])
+n2 <- sum(tab[, "A"])
+d2disp <- prettyNum(d2, big.mark = ",")
+d1disp <- prettyNum(d1, big.mark = ",")
+n1disp <- prettyNum(n1, big.mark = ",")
+n2disp <- prettyNum(n2, big.mark = ",")
+v_delta_vote <- (tab["Other","A"] - tab["A","Other"]) / d2
+```
+
+When we substitute in the numbers from the example transition table, we get the following estimate of the party switching component:
+
+`r paste("$$\nV_{\\Delta vote}=\\frac{", tabdisp["Other","A"]," - ",tabdisp["A","Other"], "}{ ", d2disp, "}=", round(v_delta_vote, 3), "$$")`
+
+The change in the turnout switching component for party A is the number of people switching from non-voting to party A minus the number switching from party A to non-voting:
+
+$$
+n_{\Delta DNV } =  M[DNV,A] - M[A,DNV]
+$$
+Turnout change can greatly affect the denominator as well, so that component also includes turnout switching to and from other parties 
+
+$$
+d_{\Delta DNV } =  \big ( M[DNV,A] + M[DNV,Oth] \big ) - \big ( M[A,DNV] + M[Oth,DNV] \big )
+$$
+
+the turnout component is therefore defined as:
+
+$$
+V_{\Delta DNV} = \frac{(M[DNV,A] - M[A,DNV]) - \big ( n_1 \cdot \frac{ \big ( M[DNV,A] + M[DNV,Oth] \big ) - \big ( M[A,DNV] + M[Oth,DNV] \big )}{d_1} \big )}{ d_2}
+$$
+Substituting in the numbers from the example gives:
+
+```{r}
+
+v_delta_dnv <- ((tab["DNV", "A"] - tab["A", "DNV"]) - (n1 * ((tab["DNV", "A"] + tab["DNV", "Other"]) - (tab["A", "DNV"] + tab["Other", "DNV"]))) / d1) / d2
+
+```
+
+`r  paste0("$$V_{\\Delta DNV} = \\frac{(", tabdisp['DNV', 'A'], " - ", tabdisp["A", "DNV"], ") - \\big ( ", n1disp, "\\cdot \\frac{ \\big ( ", tabdisp['DNV', 'A']," + ", tabdisp['DNV', 'Other']," \\big ) - \\big ( ", tabdisp["A", "DNV"]," + ", tabdisp["Other", "DNV"]," \\big )}{", d1disp, "} \\big )}{ ", d2disp, "}=", prettyNum(round(v_delta_dnv,3), big.mark = ","),"$$")`
+
+
+Finally, population replacement's numerator change is defined as:
+
+$$
+n_{\Delta pop } =  M[Inelig,A] - M[A,Dead]
+$$
+and the denominator change as:
+
+$$
+d_{\Delta pop } =   (M[Inelig,A] + M[Inelig,Oth]) - (M[A,Dead] + M[Oth,Dead])
+$$
+
+$$
+V_{\Delta pop}=\frac{M[Inelig,A] - M[A,Dead] - \big ( n_1 \cdot \frac{ (M[Inelig,A] + M[Inelig,Oth]) - (M[A,Dead] + M[Oth,Dead])}{d_1} \big )}{ d_2} 
+$$
+```{r}
+
+v_delta_pop <- ((tab["Ineligible", "A"] - tab["A", "Dead"]) - (n1 * ((tab["Ineligible", "A"] + tab["Ineligible", "Other"]) - (tab["A", "Dead"] + tab["Other", "Dead"]))) / d1) / d2
+
+```
+
+`r  paste0("$$V_{\\Delta pop} = \\frac{(", tabdisp['Ineligible', 'A'], " - ", tabdisp["A", "Dead"], ") - \\big ( ", n1disp, "\\cdot \\frac{ \\big ( ", tabdisp['Ineligible', 'A']," + ", tabdisp['Ineligible', 'Other']," \\big ) - \\big ( ", tabdisp["A", "Dead"]," + ", tabdisp["Other", "Dead"]," \\big )}{", d1disp, "} \\big )}{ ", d2disp, "}=", prettyNum(round(v_delta_pop,3), big.mark = ","),"$$")`
+
+The `r round((a.sh.e2- a.sh.e1 ) * 100)`  percentage point increase in A's vote share therefore decomposes into `r round(v_delta_vote * 100,2)` percentage points from party switching, `r round(v_delta_dnv * 100,2)` percentage points from turnout switching, and `r round(v_delta_pop * 100,2)` percentage points from population replacement. 
+
+In this case, the components all increased A's vote share but it would also be possible for components to partially cancel out. 
+
+# Applying this to real data
+
+
+
+```{r}
+if(Sys.info()["sysname"] == "Darwin"){
+  panel.folder <- ""
+  cs.folder <- "/Users/jackbailey/Dropbox (The University of Manchester)/cross_section_coding"
+  # drake.folder <- "/Users/jackbailey/Dropbox (The University of Manchester)/drake"
+} else if(Sys.getenv("USERNAME")=="Jon") {
+  panel.folder <- "C:/Dropbox/BES voter change paper"
+  cs.folder <- "C:/Dropbox/cross_section_coding"
+  # drake.folder <- "C:/Dropbox/drake/"
+}
+
+
+plotRelativeImportance <- function(parties.for.plot, study.flow.wide) {
+  study.flow.wide.plot <- study.flow.wide[study.flow.wide$family %in% parties.for.plot, ]
+  
+  study.flow.wide.plot$country.index <- as.numeric(factor(study.flow.wide.plot$country))
+  study.flow.wide.plot$family.index <- as.numeric(factor(study.flow.wide.plot$family))
+  
+  study.flow.wide.plot <- study.flow.wide.plot[study.flow.wide.plot$e2.share>0.1, ]
+  study.flow.wide.plot <- study.flow.wide.plot[complete.cases(study.flow.wide.plot), ]
+  study.flow.wide.plot <- study.flow.wide.plot[study.flow.wide.plot$family!="Other", ]
+  max.ctry.index <- max(study.flow.wide.plot$country.index)
+  max.family.index <- max(study.flow.wide.plot$family.index)
+  
+  study.flow.wide.plot$ymax <- max(study.flow.wide.plot$vote.over.dnv)+0.1
+  study.flow.wide.plot$ymin <- min(study.flow.wide.plot$vote.over.dnv)-0.1
+  
+  # 
+  
+  study.flow.wide.plot$odd <- is.even(study.flow.wide.plot$family.index)
+  study.flow.wide.plot$odd[duplicated(study.flow.wide.plot$family.index)] <- FALSE
+  study.flow.wide.plot$partyelec <- paste(study.flow.wide.plot$election_id, study.flow.wide.plot$Party)
+  
+  relative.influence.plot <- ggplot(study.flow.wide.plot,
+                                    aes(y = vote.over.dnv, 
+                                        group = partyelec,
+                                        x = family.long, 
+                                        colour = country,
+                                        label = country)) + 
+    geom_point(alpha=0) +
+    geom_rect(aes(xmin = (family.index-0.5),
+                  xmax = (family.index+0.5),
+                  ymin = ymin,
+                  ymax= ymax, fill = odd, alpha = odd),
+              colour= NA, show.legend = F) +
+    theme_tropic() + 
+    scale_alpha_manual(values = c(0, 0.3)) +
+    scale_fill_manual(values=as.vector( c('white', tropic.cols["lightgreen"]))) + 
+    scale_y_continuous(labels = percent, limits = c(-0.2, 1)) +
+    geom_text_repel(size = 1.8, 
+                    direction = "x", 
+                    min.segment.length = 1000,
+                    box.padding = 0, alpha = 1,
+                    max.overlaps = 1000000, force_pull=2) + 
+    geom_hline(yintercept = 0, linetype = 2) +
+    ylab("Absolute vote change due to party switching\nminus vote change due to turnout switching\n(as % of vote share at election 2)") + 
+    guides(colour = FALSE, fill = F) + 
+    xlab("Party family")
+  
+  return(relative.influence.plot)
+}
+source(paste0(cs.folder, "/scripts/functions/functions.R"))
+
+
+load(paste0(panel.folder, "/survey_restricted/workspace.rdata"))
+studies <- names(trans.new)
+
+study.flows <- lapply(studies, trans.new = trans.new, netFlowFromTrans)
+study.flows <- do.call(rbind, study.flows)
+study.flows$country <- sapply(strsplit(study.flows$election_id, "_"), function(x) x[1])
+study.flows$election_type <- sapply(strsplit(study.flows$election_id, "_"), function(x) x[4])
+study.flows$election2 <- as.Date(sapply(strsplit(study.flows$election_id, "_"), function(x) x[3]))
+study.flow.wide <- study.flows %>% slct(country , election_id, election2, type, 
+                                        Party, e2.share, family, abs.value.e2sh)
+library(tidyr)
+study.flow.wide <- study.flow.wide %>% pivot_wider(id_cols = c(country , family, election_id, election2, 
+                                                               Party, e2.share), 
+                                                   names_from = type, values_from = abs.value.e2sh)
+
+
+study.flow.wide$vote.over.dnv <- study.flow.wide$Vote - study.flow.wide$DNV
+
+
+family.lookup <- c(con = "Conservative", 
+                   lib = "Liberal", chr = "Christian Democrat", 
+                   Other = "Other", agr = "Agrarian",
+                   spec = "Special Issue", 
+                   right = "Radical right",
+                   eco = "Green", soc = "Social Democrat")
+study.flow.wide$family.long <- family.lookup[study.flow.wide$family]
+
+flow.family <- tapply(study.flows$abs.value.e2sh, list(component = study.flows$type, 
+                                                       family = study.flows$family), 
+                      mean, na.rm = T)
+
+vote.more.important <- prop.table(table(study.flow.wide$vote.over.dnv>0))["TRUE"]
+
+
+# source(paste0(cs.folder, "/scripts/functions/post_bs_functions.R"), encoding = "utf-8")
+```
+
+
+So what happens when I apply this to the `r nrow(study.flow.wide)` party-election observations in the data? Party switching is a larger contributor to changes in party vote shares `r round(vote.more.important * 100)`% of the time, meaning that party switching is more important for most parties as well as most elections. 
+
+But maybe certain types of parties rely more on turnout? The following graph shows that's not the case. Higher numbers on this graph indicate that party switching contributed more to change than turnout switching. On average, parties in **every family** (e.g. conservative, social democrat, christian democrat, radical right etc) in **all 18 countries** is more affected by party switching than turnout switching. 
+
+
+```{r relimp, fig.cap = "Relative importance", fig.height = 10, fig.width = 8}
+relative.importance.plot1 <- plotRelativeImportance(c("agr", "spec", "eco", "right"), 
+                       study.flow.wide = study.flow.wide)
+relative.importance.plot2  <- plotRelativeImportance(c("con", "chr", "soc", "lib"), 
+                       study.flow.wide = study.flow.wide)
+
+library(gridExtra)
+library(extrafont)
+relative.importance.plot.comb <- arrangeGrob(relative.importance.plot2, relative.importance.plot1,  nrow = 2, ncol =1)
+plot(relative.importance.plot.comb)
+```
+
+So my results continue to show that elections are overwhelmingly won and lost by party switching rather than turnout switching. This is true for parties everywhere on the political spectrum and all around the world. 
