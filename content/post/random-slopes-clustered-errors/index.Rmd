@@ -6,11 +6,11 @@ math: true
 categories: ["statistics", "simulations", "random slopes", "clustered standard errors", "cross-level interaction"]
 tags: ["statistics", "simulations", "random slopes", "clustered standard errors", "cross-level interaction"]
 output:
- bookdown::pdf_document2:
+ bookdown::html_document2:
   latex_engine: xelatex
   keep_tex: true
   toc: false
- bookdown::html_document2:
+ bookdown::pdf_document2:
   latex_engine: xelatex
   keep_tex: true
   toc: false
