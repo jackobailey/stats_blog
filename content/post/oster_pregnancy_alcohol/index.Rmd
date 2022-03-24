@@ -1,7 +1,7 @@
 ---
 title: "Alcohol and Asteroids"
 author: "Jon Mellon"
-date: '2022-03-07'
+date: '2022-03-22'
 math: true
 categories: ["statistics", "alcohol and pregnancy"]
 tags: ["statistics", "alcohol", "Emily Oster", "expecting better", "pregnancy"]
@@ -66,7 +66,7 @@ There's a large point mass at exactly zero, but a non-zero probability that the 
 
 I'm going to refer to this colloquially as the asteroid prior. The effect of an asteroid is usually exactly zero (because it misses the earth or burns up in the atmosphere), but if it does get through, the outcomes are all some version of bad.[^korea] In this analogy, the scientific question is just whether alcohol makes it through to cause harm, no one disagrees about the direction of the effect if it does.
 
-[^korea]: I've added on a small tail of positive outcomes to the prior  (perhaps the asteroid hits Vladmir Putin and ends the invasion of Ukraine), but for the levels of evidence we're talking about it's not going to matter. 
+[^korea]: I've added on a small tail of positive outcomes to the prior (perhaps the asteroid hits Vladmir Putin and ends the invasion of Ukraine), but for the levels of evidence we're talking about it's not going to matter. 
 
 You might think that holding an asteroid prior such as this is unscientific and that no quality of evidence could ever convince someone who holds it. While it is true that this prior will always say that light drinking is bad in expectation, high quality evidence could hypothetically reduce the plausible effect size to very close to zero and make the probability that the effect size is exactly zero arbitrarily high. If the evidence suggested that there is a 99% chance that the effect is exactly zero and that—if it is non-zero—there is a 99% chance that the effect has a smaller magnitude than 0.2 IQ points, few people would think it was worth advising against light drinking.
 

@@ -1,7 +1,7 @@
 ---
 title: "Do cluster robust standard errors give false positives on cross-level interactions?"
 author: "Jon Mellon"
-date: '2022-03-07'
+date: '2022-03-21'
 math: true
 categories: ["statistics", "simulations", "random slopes", "clustered standard errors", "cross-level interaction"]
 tags: ["statistics", "simulations", "random slopes", "clustered standard errors", "cross-level interaction"]
