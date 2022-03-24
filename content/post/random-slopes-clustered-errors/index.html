@@ -75,6 +75,6 @@ leftvote_{ij} = \alpha_{j} + \gamma_{j} \cdot poverty_i +
 </tr>
 </tbody>
 </table>
-<p>As expected, fitting the data using the standard <em>lm</em> function gives huge t-statistics on the cross-level interaction and random intercepts alone change essentially nothing. In both cases, we see around a 90% false positive rate which is pretty awful. As expected, Heisig and Schaeffer’s recommendation to use random slopes improves things a lot with the false positive rate falling to around the 5% level expected.</p>
+<p>As expected, fitting the data using the standard <em>lm</em> function gives huge t-statistics on the cross-level interaction and random intercepts alone change essentially nothing. In both cases, we see around a 90% false positive rate which is pretty awful. As expected, Heisig and Schaeffer’s recommendation to use random slopes improves things a lot, with the false positive rate falling to around the 5% level expected.</p>
 <p>Perhaps surprisingly, cluster robust standard errors get much closer to the random slope model’s performance, with only a 6% false positive rate. While that’s not quite the theoretical 5%, it makes me more confident that studies using cluster robust standard errors for cross-level interactions aren’t generating automatic false positives.</p>
 <p>This is just one set of simulations, so I’m not making wider claims about these methods but this felt like a useful thing to share.</p>

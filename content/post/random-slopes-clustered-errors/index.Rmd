@@ -27,6 +27,7 @@ knitr::opts_knit$set(eval.after = "fig.cap")
 ```
 
 ```{r, include = F, cache = T}
+set.seed(90210)
 library(miceadds)
 
 simClusters <- function() {
@@ -131,7 +132,7 @@ kable(t(tresults), caption = paste0("Proportion of significant results and mean 
 
 ```
 
-As expected, fitting the data using the standard *lm* function gives huge t-statistics on the cross-level interaction and random intercepts alone change essentially nothing. In both cases, we see around a 90% false positive rate which is pretty awful. As expected, Heisig and Schaeffer's recommendation to use random slopes improves things a lot with the false positive rate falling to around the 5% level expected.
+As expected, fitting the data using the standard *lm* function gives huge t-statistics on the cross-level interaction and random intercepts alone change essentially nothing. In both cases, we see around a 90% false positive rate which is pretty awful. As expected, Heisig and Schaeffer's recommendation to use random slopes improves things a lot, with the false positive rate falling to around the 5% level expected.
 
 Perhaps surprisingly, cluster robust standard errors get much closer to the random slope model's performance, with only a `r round(tresults["Prop. significant", "Cluster robust SEs"] * 100)`% false positive rate. While that's not quite the theoretical 5%, it makes me more confident that studies using cluster robust standard errors for cross-level interactions aren't generating automatic false positives.
 
