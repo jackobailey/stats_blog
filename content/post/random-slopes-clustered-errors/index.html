@@ -1,16 +1,16 @@
 ---
 title: "Do cluster robust standard errors give false positives on cross-level interactions?"
 author: "Jon Mellon"
-date: '2022-03-07'
+date: '2022-03-21'
 math: true
 categories: ["statistics", "simulations", "random slopes", "clustered standard errors", "cross-level interaction"]
 tags: ["statistics", "simulations", "random slopes", "clustered standard errors", "cross-level interaction"]
 output:
- bookdown::pdf_document2:
+ bookdown::html_document2:
   latex_engine: xelatex
   keep_tex: true
   toc: false
- bookdown::html_document2:
+ bookdown::pdf_document2:
   latex_engine: xelatex
   keep_tex: true
   toc: false
@@ -55,17 +55,17 @@ leftvote_{ij} = \alpha_{j} + \gamma_{j} \cdot poverty_i +
 <tbody>
 <tr class="odd">
 <td align="left">lm</td>
-<td align="right">0.882</td>
-<td align="right">13.3</td>
+<td align="right">0.900</td>
+<td align="right">13.9</td>
 </tr>
 <tr class="even">
 <td align="left">Random intercept</td>
-<td align="right">0.880</td>
-<td align="right">13.3</td>
+<td align="right">0.900</td>
+<td align="right">13.9</td>
 </tr>
 <tr class="odd">
 <td align="left">Random intercepts &amp; slopes</td>
-<td align="right">0.042</td>
+<td align="right">0.038</td>
 <td align="right">0.8</td>
 </tr>
 <tr class="even">
