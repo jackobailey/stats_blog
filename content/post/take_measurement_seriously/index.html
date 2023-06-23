@@ -534,16 +534,16 @@ x2
 <p>Instead, item response theory (IRT) models, treat the survey questions as being generated from an underlying latent variable <span class="math inline">\(\theta\)</span>, with the relationship between <span class="math inline">\(\theta\)</span> and indicator estimated separately for each question through functional forms such as: <span class="math inline">\(P(x_{1q}=1|\theta,a,b)=\frac{e^{a(\theta-b)}}{1+e^{a(\theta-b)}}\)</span> for the 2PL model.</p>
 <p>Here’s a quick simulation of some data generated for this type of model. I generate binary items here, but IRT is extended straightforwardly to the ordinal case.</p>
 <pre class="r"><code>library(mirt)
-set.seed(487)
+set.seed(4822)
 n &lt;- 1000
 cat &lt;- sample(0:1, n, replace = T)
 x1 &lt;- rnorm(n) 
 x1 &lt;- scale(x1)[, ]
-x2 &lt;- rnorm(n,2)  + x1 + cat
+x2 &lt;- rnorm(n)  + x1 + cat
 x2 &lt;- scale(x2)[, ]
 
 alpha &lt;- 1
-y &lt;- alpha + x1 + x2  + rnorm(n, 3)
+y &lt;- alpha + x1 - x2  + rnorm(n, sd = 1)
 
 x1a &lt;- rbinom(prob = plogis(x1 * 2 + rnorm(n, sd=1)- 1) , size = 1, n=n)
 x1b &lt;- rbinom(prob = plogis(x1 * 0.25 + rnorm(n, sd=1)+1), size = 1, n=n)
@@ -584,10 +584,10 @@ Sum
 x1
 </td>
 <td style="text-align:right;">
-0.786
+0.778
 </td>
 <td style="text-align:right;">
-0.642
+0.643
 </td>
 </tr>
 <tr>
@@ -595,25 +595,77 @@ x1
 x2
 </td>
 <td style="text-align:right;">
-0.603
+0.661
 </td>
 <td style="text-align:right;">
-0.539
+0.583
 </td>
 </tr>
 </tbody>
 </table>
 <p>However, if you just plug the IRT estimates into a regression you get some serious attenuation bias. <span class="math inline">\(x_1\)</span>’s coefficient should be 1 and <span class="math inline">\(x_2\)</span>’s coefficient should be -1. Clearly, we need to account for the measurement error.</p>
-<pre class="r"><code>basic.irt.data &lt;- data.frame(x1 = x1.hat[, 1], x2 = x2.hat[, 1], y)
-lm(data = basic.irt.data, 
-   formula = y~x1+x2)</code></pre>
-<pre><code>## 
-## Call:
-## lm(formula = y ~ x1 + x2, data = basic.irt.data)
-## 
-## Coefficients:
-## (Intercept)           x1           x2  
-##       4.015        1.334        1.044</code></pre>
+<pre class="r"><code>basic.irt.data &lt;- data.frame(x1 = x1.hat[, 1], 
+                             x2 = x2.hat[, 1], y)
+modelsummary(lm(data = basic.irt.data, 
+   formula = y~x1+x2), gof_omit = &quot;.*&quot;)</code></pre>
+<table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:center;">
+ (1)
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:center;">
+1.056
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+(0.038)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+x1
+</td>
+<td style="text-align:center;">
+0.457
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+(0.052)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+x2
+</td>
+<td style="text-align:center;">
+−0.447
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+(0.055)
+</td>
+</tr>
+</tbody>
+</table>
 <p>MIRT has a bunch of useful tools to help us here including a function for estimating the reliability of the IRT scores. So let’s use those to calculate reliabilities and plug those into the error-in-variable model:</p>
 <pre class="r"><code>reliabilities &lt;- c(x1 = as.vector(empirical_rxx(x1.hat)),
                    x2 = as.vector(empirical_rxx(x2.hat)))
@@ -646,16 +698,16 @@ kable(round(summarizeEIV(naive.irt.eiv.mod ), 3))</code></pre>
 (Intercept)
 </td>
 <td style="text-align:right;">
-4.015
+1.056
 </td>
 <td style="text-align:right;">
-0.056
+0.045
 </td>
 <td style="text-align:right;">
-4.015
+1.056
 </td>
 <td style="text-align:right;">
-0.047
+0.038
 </td>
 </tr>
 <tr>
@@ -663,16 +715,16 @@ kable(round(summarizeEIV(naive.irt.eiv.mod ), 3))</code></pre>
 x1
 </td>
 <td style="text-align:right;">
-1.515
+1.344
 </td>
 <td style="text-align:right;">
-0.151
+0.175
 </td>
 <td style="text-align:right;">
-1.334
+0.457
 </td>
 <td style="text-align:right;">
-0.061
+0.052
 </td>
 </tr>
 <tr>
@@ -680,16 +732,16 @@ x1
 x2
 </td>
 <td style="text-align:right;">
-2.546
+-1.468
 </td>
 <td style="text-align:right;">
-0.287
+0.203
 </td>
 <td style="text-align:right;">
-1.044
+-0.447
 </td>
 <td style="text-align:right;">
-0.080
+0.055
 </td>
 </tr>
 </tbody>
@@ -707,10 +759,10 @@ x2
 sd(x1)</code></pre>
 <pre><code>## [1] 1</code></pre>
 <pre class="r"><code>sd(x1.classical)</code></pre>
-<pre><code>## [1] 1.267955</code></pre>
+<pre><code>## [1] 1.250823</code></pre>
 <p>But this isn’t what happens with IRT estimates. Our <span class="math inline">\(x_1^{IRT}\)</span> IRT estimates from earlier are actually underdispersed compared to the true value. This is because IRT estimates are based on a Bayesian approach that applies shrinkage.</p>
 <pre class="r"><code>sd(x1.hat[, 1])</code></pre>
-<pre><code>## [1] 0.8124328</code></pre>
+<pre><code>## [1] 0.7791215</code></pre>
 <p>This is despite the fact the classical error variable <span class="math inline">\(x_{1}^{classical}\)</span> and IRT estimate <span class="math inline">\(x_1^{IRT}\)</span> are similarly correlated with the underlying variable <span class="math inline">\(x_1^{*}\)</span>.</p>
 <table>
 <thead>
@@ -726,10 +778,10 @@ Classical
 <tbody>
 <tr>
 <td style="text-align:right;">
-0.786
+0.778
 </td>
 <td style="text-align:right;">
-0.759
+0.761
 </td>
 </tr>
 </tbody>
@@ -750,7 +802,7 @@ True
 IRT
 </td>
 <td style="text-align:right;">
-659.4
+606.4
 </td>
 </tr>
 <tr>
@@ -758,7 +810,7 @@ IRT
 Classical
 </td>
 <td style="text-align:right;">
-1606.4
+1564.4
 </td>
 </tr>
 </tbody>
@@ -775,7 +827,7 @@ s = \sqrt{ \bigg (\frac{1}{\rho(x_1^{classical},x_1^{*})} \bigg )^2 - 1}
 <p><span class="math display">\[
 x_{1}^{irt😎}  = \frac{x_{1}^{irt}}{Var \big (x_{1}^{irt} \big )^ 2} \cdot \Bigg ( 1+\sqrt{ \bigg (\frac{1}{\rho(x_1^{irt},x_1^{*})} \bigg )^2 - 1} \Bigg )
 \]</span></p>
-<p>OK enough equations. Does it work? Yeah, pretty much.</p>
+<p>OK enough equations. Does it work? It certainly seems to improve things.</p>
 <pre class="r"><code>rhoToS &lt;- function(rho) {
   s &lt;- sqrt((1 / rho)^2 - 1)  
   return(s)
@@ -815,16 +867,16 @@ kable(round(summarizeEIV(cool.irt.eiv.mod ), 3))</code></pre>
 (Intercept)
 </td>
 <td style="text-align:right;">
-4.015
+1.056
 </td>
 <td style="text-align:right;">
-0.056
+0.045
 </td>
 <td style="text-align:right;">
-4.015
+1.056
 </td>
 <td style="text-align:right;">
-0.047
+0.038
 </td>
 </tr>
 <tr>
@@ -832,16 +884,16 @@ kable(round(summarizeEIV(cool.irt.eiv.mod ), 3))</code></pre>
 x1
 </td>
 <td style="text-align:right;">
-0.999
+0.815
 </td>
 <td style="text-align:right;">
-0.100
+0.106
 </td>
 <td style="text-align:right;">
-0.880
+0.277
 </td>
 <td style="text-align:right;">
-0.040
+0.032
 </td>
 </tr>
 <tr>
@@ -849,16 +901,16 @@ x1
 x2
 </td>
 <td style="text-align:right;">
-0.975
+-0.795
 </td>
 <td style="text-align:right;">
 0.110
 </td>
 <td style="text-align:right;">
-0.400
+-0.242
 </td>
 <td style="text-align:right;">
-0.031
+0.030
 </td>
 </tr>
 </tbody>
@@ -879,7 +931,7 @@ True
 IRT
 </td>
 <td style="text-align:right;">
-659.4
+606.4
 </td>
 </tr>
 <tr>
@@ -887,7 +939,7 @@ IRT
 Classical
 </td>
 <td style="text-align:right;">
-1606.4
+1564.4
 </td>
 </tr>
 <tr>
@@ -895,7 +947,7 @@ Classical
 IRT😎
 </td>
 <td style="text-align:right;">
-1515.0
+1646.7
 </td>
 </tr>
 </tbody>

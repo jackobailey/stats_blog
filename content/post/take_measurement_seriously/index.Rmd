@@ -177,16 +177,16 @@ Here's a quick simulation of some data generated for this type of model. I gener
 
 ```{r, echo=T}
 library(mirt)
-set.seed(487)
+set.seed(4822)
 n <- 1000
 cat <- sample(0:1, n, replace = T)
 x1 <- rnorm(n) 
 x1 <- scale(x1)[, ]
-x2 <- rnorm(n,2)  + x1 + cat
+x2 <- rnorm(n)  + x1 + cat
 x2 <- scale(x2)[, ]
 
 alpha <- 1
-y <- alpha + x1 + x2  + rnorm(n, 3)
+y <- alpha + x1 - x2  + rnorm(n, sd = 1)
 
 x1a <- rbinom(prob = plogis(x1 * 2 + rnorm(n, sd=1)- 1) , size = 1, n=n)
 x1b <- rbinom(prob = plogis(x1 * 0.25 + rnorm(n, sd=1)+1), size = 1, n=n)
@@ -239,9 +239,10 @@ kable(t(round(cors.sum.irt,3)))
 However, if you just plug the IRT estimates into a regression you get some serious attenuation bias. $x_1$'s coefficient should be 1 and $x_2$'s coefficient should be -1. Clearly, we need to account for the measurement error. 
 
 ```{r, echo = T}
-basic.irt.data <- data.frame(x1 = x1.hat[, 1], x2 = x2.hat[, 1], y)
-lm(data = basic.irt.data, 
-   formula = y~x1+x2)
+basic.irt.data <- data.frame(x1 = x1.hat[, 1], 
+                             x2 = x2.hat[, 1], y)
+modelsummary(lm(data = basic.irt.data, 
+   formula = y~x1+x2), gof_omit = ".*")
 ```
 
 MIRT has a bunch of useful tools to help us here including a function for estimating the reliability of the IRT scores. So let's use those to calculate reliabilities and plug those into the error-in-variable model:
@@ -323,7 +324,7 @@ $$
 x_{1}^{irt😎}  = \frac{x_{1}^{irt}}{Var \big (x_{1}^{irt} \big )^ 2} \cdot \Bigg ( 1+\sqrt{ \bigg (\frac{1}{\rho(x_1^{irt},x_1^{*})} \bigg )^2 - 1} \Bigg )
 $$
 
-OK enough equations. Does it work? Yeah, pretty much. 
+OK enough equations. Does it work? It certainly seems to improve things. 
 
 ```{r, echo = T}
 
@@ -344,6 +345,7 @@ kable(round(summarizeEIV(cool.irt.eiv.mod ), 3))
 
 
 ```
+
 Looking at the $X\prime X$ assumption of the EIV model, we see that the rescaled IRT estimates now show the same inflation as the classical error. 
 
 ```{r}
