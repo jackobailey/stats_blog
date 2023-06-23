@@ -26,6 +26,7 @@ always_allow_html: true
 
 <p>One of the laments I often hear in social science is that we don’t take measurement error seriously enough. Fair enough! This blogpost is a record of me attempting to take it seriously. I’m going to focus on error-in-variables models with IRT estimates in this post, but I’ve also been playing around with multiple over-imputation and plausible values, so other brands are available.<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a></p>
 <p>tl;dr measurement error is really hard to deal with, but error-in-variables regression seems to be able to play reasonably nicely with IRT models after a bit of work.</p>
+<p>Note: I set seeds in this blogpost to keep the models matching the description in the text. Systematic simulations will be needed before anyone should run out and use this approach.</p>
 <div id="starting-simple" class="section level1">
 <h1>Starting simple</h1>
 <p>A few basics. Random measurement error on the dependent variable does not bias regression coefficients.</p>
@@ -126,12 +127,12 @@ xobs
 </tr>
 </tbody>
 </table>
-<p>People often dismiss measurement error because it just makes our estimates more conservative. Besides the fact that that is still bad, it’s really only true for correctly specified single variable models. Take this example where Y is a combination of <span class="math inline">\(x_1\)</span> and <span class="math inline">\(x_2\)</span> and <span class="math inline">\(x_2\)</span> has measurement error (for the rest of this post, I’ll set <span class="math inline">\(x_1\)</span> and <span class="math inline">\(x_2\)</span> to have coefficients of 1).</p>
+<p>People often dismiss measurement error because it just makes our estimates more conservative. Besides the fact that that is still bad, it’s really only true for correctly specified single variable models. Take this example where Y is a combination of <span class="math inline">\(x_1\)</span> and <span class="math inline">\(x_2\)</span> and <span class="math inline">\(x_2\)</span> has measurement error (<span class="math inline">\(x_1\)</span> and <span class="math inline">\(x_2\)</span> are both set to have coefficients of 1).</p>
 <pre class="r"><code>x1 &lt;- rnorm(n)
 x2 &lt;- x1 + 0.5 * rnorm(n)
 x2 &lt;- scale(x2)[, ]
 y &lt;- x1 + x2 + rnorm(n)
-x2obs &lt;- x2 + rnorm(n, sd = 3)
+x2obs &lt;- x2 + rnorm(n, sd = 1)
 
 modelsummary(lm(y~x1 + x2obs), gof_omit = &quot;.*&quot;) </code></pre>
 <table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
@@ -150,7 +151,7 @@ modelsummary(lm(y~x1 + x2obs), gof_omit = &quot;.*&quot;) </code></pre>
 (Intercept)
 </td>
 <td style="text-align:center;">
-−0.002
+0.005
 </td>
 </tr>
 <tr>
@@ -165,14 +166,14 @@ modelsummary(lm(y~x1 + x2obs), gof_omit = &quot;.*&quot;) </code></pre>
 x1
 </td>
 <td style="text-align:center;">
-1.884
+1.738
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
 </td>
 <td style="text-align:center;">
-(0.036)
+(0.044)
 </td>
 </tr>
 <tr>
@@ -180,14 +181,14 @@ x1
 x2obs
 </td>
 <td style="text-align:center;">
-0.028
+0.189
 </td>
 </tr>
 <tr>
 <td style="text-align:left;">
 </td>
 <td style="text-align:center;">
-(0.011)
+(0.031)
 </td>
 </tr>
 </tbody>
@@ -232,13 +233,13 @@ kable(round(summarizeEIV(eiv.basic), 3), escape = F, booktabs = TRUE)</code></pr
 (Intercept)
 </td>
 <td style="text-align:right;">
--0.002
+0.083
 </td>
 <td style="text-align:right;">
-0.034
+0.063
 </td>
 <td style="text-align:right;">
--0.002
+0.005
 </td>
 <td style="text-align:right;">
 0.034
@@ -249,16 +250,16 @@ kable(round(summarizeEIV(eiv.basic), 3), escape = F, booktabs = TRUE)</code></pr
 x1
 </td>
 <td style="text-align:right;">
-1.881
+0.609
 </td>
 <td style="text-align:right;">
-0.033
+0.438
 </td>
 <td style="text-align:right;">
-1.884
+1.738
 </td>
 <td style="text-align:right;">
-0.036
+0.044
 </td>
 </tr>
 <tr>
@@ -266,30 +267,31 @@ x1
 x2obs
 </td>
 <td style="text-align:right;">
-0.032
+1.427
 </td>
 <td style="text-align:right;">
-0.013
+0.480
 </td>
 <td style="text-align:right;">
-0.028
+0.189
 </td>
 <td style="text-align:right;">
-0.011
+0.031
 </td>
 </tr>
 </tbody>
 </table>
-<p>Not bad! Both estimates now have confidence intervals that include the true value and the error in <span class="math inline">\(x_2\)</span> has been accounted for.</p>
+<p>Certainly an improvement! Both estimates now have confidence intervals that include the true value.</p>
 <p>What about if <span class="math inline">\(x_1\)</span> has error as well?</p>
 <pre class="r"><code>set.seed(373)
 x1 &lt;- rnorm(n)
-x2 &lt;- x1 + 0.5 * rnorm(n)
+x2 &lt;- x1 + rnorm(n, sd = 0.5)
 x2 &lt;- scale(x2)[, ]
 y &lt;- x1 - x2 + rnorm(n)
 
-x2obs &lt;- x2 + rnorm(n)
-x1obs &lt;- x1 + 0.5 * rnorm(n)
+x1obs &lt;- x1 + rnorm(n, sd = 0.5)
+x2obs &lt;- x2 + rnorm(n, sd = 1)
+
 
 sigmas &lt;- diag(c(x1obs = 0.5, x2obs = 1))^2
 rownames(sigmas) &lt;- colnames(sigmas) &lt;- c(&quot;x1obs&quot;, &quot;x2obs&quot;)
@@ -322,13 +324,13 @@ kable(round(summarizeEIV(eiv.basic.both.err), 3), escape = F)</code></pre>
 (Intercept)
 </td>
 <td style="text-align:right;">
-0.017
+-0.112
 </td>
 <td style="text-align:right;">
-0.066
+0.048
 </td>
 <td style="text-align:right;">
--0.065
+-0.084
 </td>
 <td style="text-align:right;">
 0.033
@@ -339,13 +341,13 @@ kable(round(summarizeEIV(eiv.basic.both.err), 3), escape = F)</code></pre>
 x1obs
 </td>
 <td style="text-align:right;">
-1.060
+1.071
 </td>
 <td style="text-align:right;">
-0.426
+0.290
 </td>
 <td style="text-align:right;">
-0.218
+0.261
 </td>
 <td style="text-align:right;">
 0.035
@@ -356,95 +358,21 @@ x1obs
 x2obs
 </td>
 <td style="text-align:right;">
--1.022
+-0.988
 </td>
 <td style="text-align:right;">
-0.477
+0.311
 </td>
 <td style="text-align:right;">
--0.095
+-0.130
 </td>
 <td style="text-align:right;">
-0.029
+0.028
 </td>
 </tr>
 </tbody>
 </table>
-<p>Still not bad actually. But you’ll notice a set.seed line has appeared in the code above. That’s because the error-in-variables estimates are a lot more variable across simulations when both variables have error. Here’s another seed where it doesn’t work quite as nicely:</p>
-<table>
-<thead>
-<tr>
-<th style="text-align:left;">
-</th>
-<th style="text-align:right;">
-<span class="math inline">\(\beta_{EIV}\)</span>
-</th>
-<th style="text-align:right;">
-<span class="math inline">\(SE_{EIV}\)</span>
-</th>
-<th style="text-align:right;">
-<span class="math inline">\(\beta_{unadj}\)</span>
-</th>
-<th style="text-align:right;">
-<span class="math inline">\(SE_{unadj}\)</span>
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:left;">
-(Intercept)
-</td>
-<td style="text-align:right;">
-0.011
-</td>
-<td style="text-align:right;">
-0.052
-</td>
-<td style="text-align:right;">
--0.004
-</td>
-<td style="text-align:right;">
-0.040
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-x1
-</td>
-<td style="text-align:right;">
-0.679
-</td>
-<td style="text-align:right;">
-0.328
-</td>
-<td style="text-align:right;">
-1.172
-</td>
-<td style="text-align:right;">
-0.043
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-x2
-</td>
-<td style="text-align:right;">
-1.322
-</td>
-<td style="text-align:right;">
-0.346
-</td>
-<td style="text-align:right;">
-0.451
-</td>
-<td style="text-align:right;">
-0.034
-</td>
-</tr>
-</tbody>
-</table>
-<p>We can also specify the error using reliability instead of a covariance matrix to specify the error structure. Assuming your measurement of reliability is good, the results come out pretty similarly:</p>
+<p>Still not bad! We can also specify the error using reliability instead of a covariance matrix to specify the error structure. Assuming your measurement of reliability is good, the results come out pretty similarly:</p>
 <pre class="r"><code># simulating new observations of x1 and x2 to estimate reliability
 x1.reliability &lt;- mean(replicate(100, cor(cbind(x1obs, (x1 + (0.5 * rnorm(n)))))[1,2]))
 x2.reliability &lt;- mean(replicate(100, cor(cbind(x2obs, (x2 + (rnorm(n)))))[1,2]))
@@ -479,16 +407,16 @@ kable(round(summarizeEIV(eiv.reliability.mod ), 3))</code></pre>
 (Intercept)
 </td>
 <td style="text-align:right;">
-0.013
+-0.111
 </td>
 <td style="text-align:right;">
-0.054
+0.046
 </td>
 <td style="text-align:right;">
--0.004
+-0.084
 </td>
 <td style="text-align:right;">
-0.040
+0.033
 </td>
 </tr>
 <tr>
@@ -496,16 +424,16 @@ kable(round(summarizeEIV(eiv.reliability.mod ), 3))</code></pre>
 x1
 </td>
 <td style="text-align:right;">
-0.616
+1.021
 </td>
 <td style="text-align:right;">
-0.349
+0.269
 </td>
 <td style="text-align:right;">
-1.172
+0.261
 </td>
 <td style="text-align:right;">
-0.043
+0.035
 </td>
 </tr>
 <tr>
@@ -513,16 +441,16 @@ x1
 x2
 </td>
 <td style="text-align:right;">
-1.392
+-0.938
 </td>
 <td style="text-align:right;">
-0.344
+0.277
 </td>
 <td style="text-align:right;">
-0.451
+-0.130
 </td>
 <td style="text-align:right;">
-0.034
+0.028
 </td>
 </tr>
 </tbody>
@@ -603,7 +531,7 @@ x2
 </tr>
 </tbody>
 </table>
-<p>However, if you just plug the IRT estimates into a regression you get some serious attenuation bias. <span class="math inline">\(x_1\)</span>’s coefficient should be 1 and <span class="math inline">\(x_2\)</span>’s coefficient should be -1. Clearly, we need to account for the measurement error.</p>
+<p>However, if you just plug the IRT estimates into a regression it doesn’t look took good: both the coefficients are attenuated.<a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a> <span class="math inline">\(x_1\)</span>’s coefficient should be 1 and <span class="math inline">\(x_2\)</span>’s coefficient should be -1. Clearly, we need to account for the measurement error.</p>
 <pre class="r"><code>basic.irt.data &lt;- data.frame(x1 = x1.hat[, 1], 
                              x2 = x2.hat[, 1], y)
 modelsummary(lm(data = basic.irt.data, 
@@ -818,7 +746,7 @@ Classical
 <p>So does that close the book on using IRT estimates in EIV models? Well, what really is the difference between the IRT and classical estimates of <span class="math inline">\(X_1^{*}\)</span>? Basically just the standard deviation of their distributions. That seems fixable.</p>
 <p>Here’s the plan: rescale <span class="math inline">\(x_{1}^{irt}\)</span> to have the same standard deviation as a classical measurement <span class="math inline">\(x_1^{classical}\)</span> of <span class="math inline">\(x_1^{*}\)</span> where <span class="math inline">\(\rho(x_1^{*}, x_{1}^{irt})=\rho(x_1^{*}, x_{1}^{classical})\)</span>. That should have the knock on effect of fulfilling the assumption of inflated diagonal elements in <span class="math inline">\(X&#39;X\)</span>.</p>
 <p>There’s a few things to work out.</p>
-<p>How do we know the correlation between our IRT estimates and true scores? In my simulations I can just cheat, but in real life we’re going to have to estimate that. Fortunately, we can just take the root of the IRT score reliability.<a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a></p>
+<p>How do we know the correlation between our IRT estimates and true scores? In my simulations I can just cheat, but in real life we’re going to have to estimate that. Fortunately, we can just take the square root of the IRT score reliability.<a href="#fn4" class="footnote-ref" id="fnref4"><sup>4</sup></a></p>
 <p>Next, we have to figure out what standard deviation an equivalent classical error estimate of <span class="math inline">\(X_1^{*}\)</span> would have. If we express the classical error as <span class="math inline">\(x_{1}^{classical}=x_{1}^{*} + \epsilon\)</span>, where <span class="math inline">\(\epsilon \sim \mathcal{N} \big ( 0, s \big )\)</span>, then the standard deviation of the error term (<span class="math inline">\(s\)</span>) is (see the end of the post for the derivation):</p>
 <p><span class="math display">\[
 s = \sqrt{ \bigg (\frac{1}{\rho(x_1^{classical},x_1^{*})} \bigg )^2 - 1}
@@ -827,7 +755,7 @@ s = \sqrt{ \bigg (\frac{1}{\rho(x_1^{classical},x_1^{*})} \bigg )^2 - 1}
 <p><span class="math display">\[
 x_{1}^{irt😎}  = \frac{x_{1}^{irt}}{Var \big (x_{1}^{irt} \big )^ 2} \cdot \Bigg ( 1+\sqrt{ \bigg (\frac{1}{\rho(x_1^{irt},x_1^{*})} \bigg )^2 - 1} \Bigg )
 \]</span></p>
-<p>OK enough equations. Does it work? It certainly seems to improve things.</p>
+<p>OK enough equations. Does it work?</p>
 <pre class="r"><code>rhoToS &lt;- function(rho) {
   s &lt;- sqrt((1 / rho)^2 - 1)  
   return(s)
@@ -915,6 +843,7 @@ x2
 </tr>
 </tbody>
 </table>
+<p>It certainly seems to improve things.</p>
 <p>Looking at the <span class="math inline">\(X\prime X\)</span> assumption of the EIV model, we see that the rescaled IRT estimates now show the same inflation as the classical error.</p>
 <table>
 <tbody>
@@ -997,6 +926,7 @@ s = \sqrt{ \bigg (\frac{1}{\rho(a,b)} \bigg )^2 - 1}
 <ol>
 <li id="fn1"><p>Many of the tricky issues I highlight in this post also apply to imputation and plausible value approaches. My overall impression is that overimputation and plausible values lead to more efficient estimates because they make much stronger assumptions about the relationships between variables. They also require that all relevant variables and their relationships are included in the modeling stage. This can get difficult if you want to estimate multiple latent scales with correlations that vary across groups. Error-in-variables regression, by contrast, can use IRT estimates that were generated without regards to a particular model usage.<a href="#fnref1" class="footnote-back">↩︎</a></p></li>
 <li id="fn2"><p>I don’t advise using the <em>LTM</em> package for IRT models. It has some bad behavior for graded response models described <a href="https://stats.stackexchange.com/questions/63891/is-r-output-reliable-specially-irt-package-ltm">here</a> that hasn’t been fixed in a decade. I spent several days thinking I didn’t understand IRT models because I couldn’t recover simulation parameters with LTM. In my experience, MIRT is great at recovering parameters in simulations (and restored my sanity), so that’s what I’m using here. A free paper idea for someone is to automatically go through replication packages that used LTM to check that MIRT gets the same results. The package has <a href="https://www.datasciencemeta.com/rpackages">nearly half a million</a> downloads, so it has almost certainly created problems in the literature.<a href="#fnref2" class="footnote-back">↩︎</a></p></li>
-<li id="fn3"><p>The reliability scores themselves might seem like a good initial guess, but these aren’t actually measuring the correct correlation. They instead measure how similar two estimates of <span class="math inline">\(X_1^{*}\)</span> will be across draws. That’s a large underestimate of <span class="math inline">\(\rho(x_1^{*}, x_{1}^{irt})\)</span>. But it’s a pretty simple fix. We can consider the correlation between independent IRT estimates of <span class="math inline">\(x_1^{*}\)</span> to represent this path diagram: <span class="math inline">\(x_1^{irt} \leftarrow x_1^{*} \rightarrow x_1^{irt}\prime\)</span>. We can therefore treat <span class="math inline">\(\rho(x_{1}^{irt}, x_{1}^{irt}\prime)\)</span> as the product of the two paths (assumed to have equal correlations): <span class="math inline">\(\rho(x_1^{*}, x_{1}^{irt}) \cdot \rho(x_1^{*}, x_{1}^{irt}\prime)\)</span>. <span class="math inline">\(\rho(x_1^{*}, x_{1}^{irt}) = \sqrt{\rho(x_{1}^{irt}, x_{1}^{irt}\prime)}\)</span>.<a href="#fnref3" class="footnote-back">↩︎</a></p></li>
+<li id="fn3"><p>IRT estimates will not always attenuate regression estimates, as they have underdispersion (which I discuss in the post later).<a href="#fnref3" class="footnote-back">↩︎</a></p></li>
+<li id="fn4"><p>The reliability scores themselves might seem like a good initial guess, but these aren’t actually measuring the correct correlation. They instead measure how similar two estimates of <span class="math inline">\(X_1^{*}\)</span> will be across draws. That’s a large underestimate of <span class="math inline">\(\rho(x_1^{*}, x_{1}^{irt})\)</span>. But it’s a pretty simple fix. We can consider the correlation between independent IRT estimates of <span class="math inline">\(x_1^{*}\)</span> to represent this path diagram: <span class="math inline">\(x_1^{irt} \leftarrow x_1^{*} \rightarrow x_1^{irt}\prime\)</span>. We can therefore treat <span class="math inline">\(\rho(x_{1}^{irt}, x_{1}^{irt}\prime)\)</span> as the product of the two paths (assumed to have equal correlations): <span class="math inline">\(\rho(x_1^{*}, x_{1}^{irt}) \cdot \rho(x_1^{*}, x_{1}^{irt}\prime)\)</span>. <span class="math inline">\(\rho(x_1^{*}, x_{1}^{irt}) = \sqrt{\rho(x_{1}^{irt}, x_{1}^{irt}\prime)}\)</span>.<a href="#fnref4" class="footnote-back">↩︎</a></p></li>
 </ol>
 </div>

@@ -33,6 +33,8 @@ One of the laments I often hear in social science is that we don't take measurem
 
 tl;dr measurement error is really hard to deal with, but error-in-variables regression seems to be able to play reasonably nicely with IRT models after a bit of work. 
 
+Note: I set seeds in this blogpost to keep the models matching the description in the text. Systematic simulations will be needed before anyone should run out and use this approach. 
+
 
 # Starting simple
 
@@ -57,14 +59,14 @@ xobs <- x + rnorm(n)
 modelsummary(lm(y~xobs), gof_omit = ".*") 
 ```
 
-People often dismiss measurement error because it just makes our estimates more conservative. Besides the fact that that is still bad, it's really only true for correctly specified single variable models. Take this example where Y is a combination of $x_1$ and $x_2$ and $x_2$ has measurement error (for the rest of this post, I'll set $x_1$ and $x_2$ to have coefficients of 1). 
+People often dismiss measurement error because it just makes our estimates more conservative. Besides the fact that that is still bad, it's really only true for correctly specified single variable models. Take this example where Y is a combination of $x_1$ and $x_2$ and $x_2$ has measurement error ($x_1$ and $x_2$ are both set to have coefficients of 1). 
 
 ```{r, echo  = T}
 x1 <- rnorm(n)
 x2 <- x1 + 0.5 * rnorm(n)
 x2 <- scale(x2)[, ]
 y <- x1 + x2 + rnorm(n)
-x2obs <- x2 + rnorm(n, sd = 3)
+x2obs <- x2 + rnorm(n, sd = 1)
 
 modelsummary(lm(y~x1 + x2obs), gof_omit = ".*") 
 ```
@@ -106,19 +108,20 @@ kable(round(summarizeEIV(eiv.basic), 3), escape = F, booktabs = TRUE)
 
 ```
 
-Not bad! Both estimates now have confidence intervals that include the true value and the error in $x_2$ has been accounted for. 
+Certainly an improvement! Both estimates now have confidence intervals that include the true value. 
 
 What about if $x_1$ has error as well?
 
 ```{r, echo = T}
 set.seed(373)
 x1 <- rnorm(n)
-x2 <- x1 + 0.5 * rnorm(n)
+x2 <- x1 + rnorm(n, sd = 0.5)
 x2 <- scale(x2)[, ]
 y <- x1 - x2 + rnorm(n)
 
-x2obs <- x2 + rnorm(n)
-x1obs <- x1 + 0.5 * rnorm(n)
+x1obs <- x1 + rnorm(n, sd = 0.5)
+x2obs <- x2 + rnorm(n, sd = 1)
+
 
 sigmas <- diag(c(x1obs = 0.5, x2obs = 1))^2
 rownames(sigmas) <- colnames(sigmas) <- c("x1obs", "x2obs")
@@ -128,28 +131,7 @@ eiv.basic.both.err <- eivreg(data = data.frame(y, x1obs, x2obs),
 kable(round(summarizeEIV(eiv.basic.both.err), 3), escape = F)
 ```
 
-Still not bad actually. But you'll notice a set.seed line has appeared in the code above. That's because the error-in-variables estimates are a lot more variable across simulations when both variables have error. Here's another seed where it doesn't work quite as nicely:
-
-```{r}
-set.seed(7)
-x1 <- rnorm(n)
-x2 <- x1 + 0.5 * rnorm(n)
-x2 <- scale(x2)[, ]
-y <- x1 + x2 + rnorm(n)
-
-
-x1obs <- x1 + (0.5 * rnorm(n))
-x2obs <- x2 + rnorm(n)
-
-sigmas <- diag(c(x1 = 0.5, x2 = 1))^2
-rownames(sigmas) <- colnames(sigmas) <- c("x1", "x2")
-ev.basic.both.err2 <- eivreg(data = data.frame(y, x1 = x1obs, x2 = x2obs), 
-                             formula = y~x1 + x2, 
-                             Sigma_error =  sigmas)
-kable(round(summarizeEIV(ev.basic.both.err2 ), 3))
-```
-
-We can also specify the error using reliability instead of a covariance matrix to specify the error structure. Assuming your measurement of reliability is good, the results come out pretty similarly: 
+Still not bad! We can also specify the error using reliability instead of a covariance matrix to specify the error structure. Assuming your measurement of reliability is good, the results come out pretty similarly: 
 
 
 ```{r, echo= TRUE}
@@ -236,7 +218,7 @@ rownames(cors.sum.irt) <- c("IRT", "Sum")
 kable(t(round(cors.sum.irt,3)))
 ```
 
-However, if you just plug the IRT estimates into a regression you get some serious attenuation bias. $x_1$'s coefficient should be 1 and $x_2$'s coefficient should be -1. Clearly, we need to account for the measurement error. 
+However, if you just plug the IRT estimates into a regression it doesn't look took good: both the coefficients are attenuated.[^irtattenuate] $x_1$'s coefficient should be 1 and $x_2$'s coefficient should be -1. Clearly, we need to account for the measurement error. 
 
 ```{r, echo = T}
 basic.irt.data <- data.frame(x1 = x1.hat[, 1], 
@@ -310,7 +292,7 @@ Here's the plan: rescale $x_{1}^{irt}$ to have the same standard deviation as a 
 
 There's a few things to work out. 
 
-How do we know the correlation between our IRT estimates and true scores? In my simulations I can just cheat, but in real life we're going to have to estimate that. Fortunately, we can just take the root of the IRT score reliability.[^reliabilityproof]
+How do we know the correlation between our IRT estimates and true scores? In my simulations I can just cheat, but in real life we're going to have to estimate that. Fortunately, we can just take the square root of the IRT score reliability.[^reliabilityproof]
 
 Next, we have to figure out what standard deviation an equivalent classical error estimate of $X_1^{*}$ would have. If we express the classical error as $x_{1}^{classical}=x_{1}^{*} + \epsilon$, where $\epsilon \sim \mathcal{N}   \big ( 0, s \big )$, then the standard deviation of the error term ($s$) is (see the end of the post for the derivation):
 
@@ -324,8 +306,11 @@ $$
 x_{1}^{irt😎}  = \frac{x_{1}^{irt}}{Var \big (x_{1}^{irt} \big )^ 2} \cdot \Bigg ( 1+\sqrt{ \bigg (\frac{1}{\rho(x_1^{irt},x_1^{*})} \bigg )^2 - 1} \Bigg )
 $$
 
-OK enough equations. Does it work? It certainly seems to improve things. 
+```{r, echo = T}
 
+```
+
+OK enough equations. Does it work?
 ```{r, echo = T}
 
 rhoToS <- function(rho) {
@@ -345,6 +330,9 @@ kable(round(summarizeEIV(cool.irt.eiv.mod ), 3))
 
 
 ```
+
+It certainly seems to improve things. 
+
 
 Looking at the $X\prime X$ assumption of the EIV model, we see that the rescaled IRT estimates now show the same inflation as the classical error. 
 
@@ -373,6 +361,8 @@ I'm sure I have at least somewhat reinvented the wheel here, but I couldn't find
 
 [^reliabilityproof]: The reliability scores themselves might seem like a good initial guess, but these aren't actually measuring the correct correlation. They instead measure how similar two estimates of $X_1^{*}$ will be across draws. That's a large underestimate of $\rho(x_1^{*}, x_{1}^{irt})$. But it's a pretty simple fix. We can consider the correlation between independent IRT estimates of $x_1^{*}$ to represent this path diagram: $x_1^{irt} \leftarrow x_1^{*} \rightarrow x_1^{irt}\prime$. We can therefore treat $\rho(x_{1}^{irt}, x_{1}^{irt}\prime)$ as the product of the two paths (assumed to have equal correlations): $\rho(x_1^{*}, x_{1}^{irt}) \cdot \rho(x_1^{*}, x_{1}^{irt}\prime)$. $\rho(x_1^{*}, x_{1}^{irt}) = \sqrt{\rho(x_{1}^{irt}, x_{1}^{irt}\prime)}$. 
 
+
+[^irtattenuate]: IRT estimates will not always attenuate regression estimates, as they have underdispersion (which I discuss in the post later). 
 
 # Correlation to standard deviation conversion
 
