@@ -6,11 +6,11 @@
     <description>Recent content in simulations on The File Drawer</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 07 Mar 2022 00:00:00 +0000</lastBuildDate><atom:link href="https://filedrawer.blog/tags/simulations/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Mon, 21 Mar 2022 00:00:00 +0000</lastBuildDate><atom:link href="https://filedrawer.blog/tags/simulations/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Do cluster robust standard errors give false positives on cross-level interactions?</title>
       <link>https://filedrawer.blog/post/random-slopes-clustered-errors/</link>
-      <pubDate>Mon, 07 Mar 2022 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 21 Mar 2022 00:00:00 +0000</pubDate>
       
       <guid>https://filedrawer.blog/post/random-slopes-clustered-errors/</guid>
       <description>One of the most easy traps to fall into in quantitative social science is fooling yourself (and your statistics software) into thinking you have more information about a question than you really do.

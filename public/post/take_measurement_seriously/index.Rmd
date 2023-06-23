@@ -1,0 +1,379 @@
+---
+title: "Can you use IRT estimates in an error-in-variables model? A tentative yes."
+author: "Jon Mellon"
+date: '2023-06-23'
+math: true
+categories: ["statistics", "measurement error", "IRT"]
+tags: ["statistics",  "measurement error", "IRT", "errors-in-variables"]
+output:
+ bookdown::html_document2:
+  latex_engine: xelatex
+  keep_tex: true
+  toc: false
+ bookdown::pdf_document2:
+  latex_engine: xelatex
+  keep_tex: true
+  toc: false
+ bookdown::word_document2:
+  latex_engine: xelatex
+  keep_tex: true
+always_allow_html: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning=FALSE, error=FALSE, message = FALSE)
+options(scipen=9999)
+knitr::opts_knit$set(eval.after = "fig.cap")
+set.seed(10033)
+```
+
+
+One of the laments I often hear in social science is that we don't take measurement error seriously enough. Fair enough! This blogpost is a record of me attempting to take it seriously. I'm going to focus on error-in-variables models in this post, but I've also been playing around with multiple over-imputation and plausible values, so other brands are available.[^notimpute] 
+
+tl;dr measurement error is really hard to deal with, but error-in-variables regression seems to be able to play reasonably nicely with IRT models, with a bit of work. 
+
+
+# Starting simple
+
+A few basics. Random measurement error on the dependent variable does not bias regression coefficients. 
+
+
+```{r, echo = T}
+n <- 1000
+x <- rnorm(n)
+y <- x + rnorm(n)
+
+# y is observed with error:
+yobs <- y + rnorm(n)
+
+lm(yobs~x)
+```
+
+By contrast, random error on an independent variable attenuates the regression coefficient:
+
+```{r, echo = T}
+xobs <- x + rnorm(n)
+# x is observed with error:
+
+lm(y~xobs)
+```
+
+People often dismiss measurement error because it just makes our estimates more conservative. Besides the fact that that is still bad, it's really only true for correctly specified single variable models. Take this example where Y is a combination of $x_1$ and $x_2$ and $x_2$ has measurement error.
+
+```{r, echo  = T}
+x1 <- rnorm(n)
+x2 <- x1 + 0.5 * rnorm(n)
+x2 <- scale(x2)[, ]
+y <- x1 + x2 + rnorm(n)
+
+x2obs <- x2 + rnorm(n)
+
+lm(y~x1 + x2obs)
+```
+
+While the coefficient on $x_2$ is attenuated, that leads to a large overestimation of the $x_1$ coefficient. This is much closer to the typical social science modeling situation where measurement error on our control variables could be flattering our preferred independent variables. It's not unusual to see scholars lovingly measure their variable of interest and add in some noisy controls with the right names. This approach can and does lead to erroneous conclusions (see my [previous post](https://www.filedrawer.blog/post/oster_pregnancy_alcohol/) for an example where this could be at work)
+
+# Error-in-variables
+
+In the toy example, there are solutions. Here's what an error-in-variables model from the *eivtools* package will give you when you tell it how much error $x_2$ was observed with:
+
+
+```{r, echo = T}
+library(eivtools)
+sigmas <- diag(c(x1 = 0, x2obs = 1))^2
+rownames(sigmas) <- colnames(sigmas) <- c("x1", "x2obs")
+summary(eivreg(data = data.frame(y, x1, x2obs), 
+               formula = y~x1 + x2obs, 
+               Sigma_error =  sigmas))
+```
+
+Not bad! Both estimates now have confidence intervals that include the true value and the error in $x_2$ has been accounted for. 
+
+What about if $x_1$ has error as well?
+
+```{r, echo = T}
+set.seed(3873)
+x1 <- rnorm(n)
+x2 <- x1 + 0.5 * rnorm(n)
+x2 <- scale(x2)[, ]
+y <- x1 + x2 + rnorm(n)
+
+x2obs <- x2 + rnorm(n)
+x1obs <- x1 + 0.5 * rnorm(n)
+
+sigmas <- diag(c(x1obs = 0.5, x2obs = 1))^2
+rownames(sigmas) <- colnames(sigmas) <- c("x1obs", "x2obs")
+summary(eivreg(data = data.frame(y, x1obs, x2obs), 
+               formula = y~x1obs + x2obs, 
+               Sigma_error =  sigmas))
+
+```
+
+Still not bad actually. But you'll notice a set.seed line has appeared in the code above. That's because the error-in-variables estimates are a lot more variable across simulations when both variables have error. Here's another seed where it doesn't work quite as nicely:
+
+```{r}
+set.seed(7)
+x1 <- rnorm(n)
+x2 <- x1 + 0.5 * rnorm(n)
+x2 <- scale(x2)[, ]
+y <- x1 + x2 + rnorm(n)
+
+
+x1obs <- x1 + (0.5 * rnorm(n))
+x2obs <- x2 + rnorm(n)
+
+sigmas <- diag(c(x1 = 0.5, x2 = 1))^2
+rownames(sigmas) <- colnames(sigmas) <- c("x1", "x2")
+summary(eivreg(data = data.frame(y, x1 = x1obs, x2 = x2obs), 
+               formula = y~x1 + x2, 
+               Sigma_error =  sigmas))
+
+```
+
+We can also specify the error using reliability instead of a covariance matrix to specify the error structure. Assuming your measurement of reliability is good, the results come out pretty similarly: 
+
+
+```{r}
+# simulating new observations of x1 and x2 to estimate reliability
+x1.reliability <- mean(replicate(100, cor(cbind(x1obs, (x1 + (0.5 * rnorm(n)))))[1,2]))
+x2.reliability <- mean(replicate(100, cor(cbind(x2obs, (x2 + (rnorm(n)))))[1,2]))
+
+summary(eivreg(data = data.frame(y = y, x1 = x1obs, x2 = x2obs), 
+               formula = y~x1 + x2, 
+               reliability =  c(x1 = x1.reliability, x2 = x2.reliability)))
+```
+
+
+# Multiple items 
+
+OK now let's move to the scenario I'm actually grappling with: multiple ordinal indicators for the same latent variable. This is a ubiquitous situation in survey research. Examples include measuring personality traits, authoritarianism, or depression with multiple questions. Survey researchers used to simply add the questions together to build these kind of scales. However, this is a highly inefficient use of the information available because different questions have different levels of performance when assessing different parts of the underlying scale. 
+
+Instead, item response theory (IRT) models, treat the survey questions as being generated from an underlying latent variable $\theta$, with the relationship between $\theta$ and indicator estimated separately for each question. 
+
+Here's a quick simulation of some data generated for this type of model. I generate binary items here, but IRT is extended straightforwardly to the ordinal case. 
+
+
+```{r, echo=T}
+library(mirt)
+n <- 1000
+cat <- sample(0:1, n, replace = T)
+x1 <- rnorm(n) 
+x1 <- scale(x1)[, ]
+x2 <- rnorm(n,2)  + x1 + cat
+x2 <- scale(x2)[, ]
+
+alpha <- 1
+y <- alpha + x1 - x2  + rnorm(n, 3)
+
+x1a <- rbinom(prob = plogis(x1 * 2 + rnorm(n, sd=1)- 1) , size = 1, n=n)
+x1b <- rbinom(prob = plogis(x1 * 0.25 + rnorm(n, sd=1)+1), size = 1, n=n)
+x1c <- rbinom(prob = plogis(x1 * 0.5 + rnorm(n, sd=1)-0.25), size = 1, n=n)
+x1d <- rbinom(prob = plogis(x1 * 1.5 + rnorm(n, sd=2)+0.25), size = 1, n=n)
+x1e <- rbinom(prob = plogis(x1 *0.1 + rnorm(n, sd=1)), size = 1, n=n)
+x1f <- rbinom(prob = plogis(x1 *4 + rnorm(n, sd=0.5)), size = 1, n=n)
+
+x2a <- rbinom(prob = plogis(x2 + rnorm(n, sd=0.25)+1), size = 1, n=n)
+x2b <- rbinom(prob = plogis(x2 *0.25+ rnorm(n, sd=0.75)-1), size = 1, n=n)
+x2c <- rbinom(prob = plogis(x2 *0.5+ rnorm(n, sd=2)+0.5), size = 1, n=n)
+x2d <- rbinom(prob = plogis(x2 *2), size = 1, n=n)
+```
+
+I then estimate an IRT model for $x_1$ and $x_2$ using the MIRT package.[^dontuseltm]  
+
+```{r, echo = T}
+x1.mod <- mirt(data = data.frame(x1a,x1b, x1c, x1d, x1e, x1f),
+               model = 1, verbose = FALSE)
+x2.mod <- mirt(data = data.frame(x2a,x2b, x2c, x2d), 
+               model = 1, verbose = FALSE)
+```
+
+MIRT allows you to predict scores for each respondent. 
+
+```{r, echo=T}
+x1.hat <- fscores(x1.mod, full.scores= TRUE, full.scores.SE = TRUE, method = "EAP")
+x2.hat <- fscores(x2.mod, full.scores= TRUE, full.scores.SE = TRUE, method = "EAP")
+```
+
+These scores are correlated pretty strongly with the underlying latent variable:
+
+```{r, include = F}
+library(knitr)
+
+x1.sum <- x1a + x1b + x1c + x1d + x1e + x1f
+x2.sum <- x2a + x2b+ x2c + x2d
+
+cors.sum.irt <- data.frame(x1 = c(cor(cbind(x1, x1.hat[, 1]))[1,2], 
+                                  cor(cbind(x1, x1.sum))[1,2]), 
+                           x2 = c(cor(cbind(x2, x2.hat[, 1]))[1,2], 
+                                  cor(cbind(x2, x2.sum))[1,2]))
+rownames(cors.sum.irt) <- c("IRT", "Sum")
+```
+
+```{r}
+kable(round(cors.sum.irt,3))
+```
+
+However, if you just plug the IRT estimates into a regression you get some serious attenuation bias. $x_1$'s coefficient should be 1 and $x_2$'s coefficient should be -1. Clearly, we need to account for the measurement error. 
+
+```{r, echo = T}
+basic.irt.data <- data.frame(x1 = x1.hat[, 1], x2 = x2.hat[, 1], y)
+lm(data = basic.irt.data, 
+   formula = y~x1+x2)
+```
+
+MIRT has a bunch of useful tools to help us here including a function for estimating the reliability of the IRT scores. So let's use those to calculate reliabilities and plug those into the error-in-variable model:
+
+
+```{r, echo = T}
+reliabilities <- c(x1 = as.vector(empirical_rxx(x1.hat)),
+                   x2 = as.vector(empirical_rxx(x2.hat)))
+
+summary(eivreg(data = basic.irt.data, 
+               formula = y~x1+x2, 
+               reliability = reliabilities))
+```
+
+We certainly seem to have solved our attenuation bias problem, but now we seem to have the opposite issue. Our regression coefficients are substantially inflated. 
+
+
+# Making IRT play nice with EIV
+
+So what's going on? 
+
+Now is a good time to remind everyone of the health warning on our blog: these post "might be wrong and are always subject to revision." 
+
+With that out of the way, this is what I think is happening. Error-in-variables is fundamentally built around the assumption of classical measurement error. You have some underlying variable $x_1^{*}$ and an indicator that is the combination of the true variable and random error $x_{1}^{classical}=x_1^{*}+E$.
+
+One interesting thing about this model of measurement error is that $x_{1}^{*}$ is over-dispersed compared to the true variable. Here's an example using the same $x_1^{*}$ variable from the earlier simulation.
+
+```{r, echo = T}
+
+x1.classical <-x1+ rnorm(n, sd = 0.8)
+
+sd(x1)
+sd(x1.classical)
+```
+
+But this isn't what happens with IRT estimates. Our $x_1^{IRT}$ IRT estimates from earlier  are actually underdispersed compared to the true value. This is because IRT estimates are based on a Bayesian estimate that applies shrinkage. 
+
+```{r, echo = T}
+sd(x1.hat[, 1])
+```
+
+This is despite the fact the classical error variable $x_{1}^{classical}$ and IRT estimate $x_1^{IRT}$  are similarly correlated with the underlying variable $x_1^{*}$. 
+
+```{r}
+cors.with.true <- data.frame(IRT = cor(cbind(x1,x1.hat))[1,2], Classical = cor(cbind(x1,x1.classical))[1,2])
+kable(round(cors.with.true,3))
+
+```
+
+I think this difference is crucial for understanding why error-in-variables regression doesn't work well with IRT estimates out of the box. Error-in-variables regression is built around the [assumption](https://journals.sagepub.com/doi/10.1177/1536867X20909692) that "the diagonal elements of $X\prime X$ are inflated relative to the corresponding diagonal elements of $X^{*}\prime X^{*}$". How do the classical and IRT estimates of $x_1^{*}$ hold up against this assumption? Here are those quantities for the original variable, IRT estimate of the variable, and classical error estimate of the variable. The classical error variable follows the EIV assumptions whereas the IRT has the opposite bias.
+
+```{r}
+
+tx1x1 <- data.frame(True = t(as.matrix(x1)) %*% as.matrix(x1),
+                    IRT = t(as.matrix(x1.hat[, 1])) %*% as.matrix(x1.hat[, 1]),
+                    Classical = t(as.matrix(x1.classical)) %*% as.matrix(x1.classical)
+)
+
+kable(round(tx1x1,1))
+```
+
+So does that close the book on using IRT estimates in EIV models? Well, what really is the difference between the IRT and classical estimates of $X_1^{*}$? Basically just the standard deviation of their distributions. That seems fixable.
+
+Here's the plan: rescale $x_{1}^{irt}$ to have the same standard deviation as a classical measurement $x_1^{classical}$ of $x_1^{*}$ where $\rho(x_1^{*}, x_{1}^{irt})=\rho(x_1^{*}, x_{1}^{classical})$. That should have the knock on effect of fulfilling the assumption of inflated diagonal elements in $X'X$. 
+
+There's a few things to work out. 
+
+How do we know the correlation between our IRT estimates and true scores? In my simulations I can just cheat, but in real life we're going to have to estimate that. Fortunately, we can just take the root of the IRT score reliability.[^reliabilityproof]
+
+Next, we have to figure out what standard deviation an equivalent classical error estimate of $X_1^{*}$ would have. If we express the classical error as $x_{1}^{classical}=x_{1}^{*} + \epsilon$, where $\epsilon \sim \mathcal{N}   \big ( 0, s \big )$, then the standard deviation of the error term ($s$) is (see the end of the post for the derivation):
+
+$$
+s = \sqrt{ \bigg (\frac{1}{\rho(x_1^{classical},x_1^{*})} \bigg )^2 - 1}
+$$
+
+So our rescaled IRT estimate $x_{1}^{irt😎}$ of $x_1^{*}$ is:
+
+$$
+x_{1}^{irt😎}  = \frac{x_{1}^{irt}}{Var \big (x_{1}^{irt} \big )^ 2} \cdot \Bigg ( 1+\sqrt{ \bigg (\frac{1}{\rho(x_1^{irt},x_1^{*})} \bigg )^2 - 1} \Bigg )
+$$
+
+OK enough equations. Does it work? Yeah, pretty much. 
+
+```{r, echo = T}
+
+rhoToS <- function(rho) {
+  s <- sqrt((1 / rho)^2 - 1)  
+  return(s)
+}
+rho.x1.est <- sqrt(empirical_rxx(x1.hat))
+rho.x2.est <- sqrt(empirical_rxx(x2.hat))
+data.hat <- data.frame(y, x1 = (x1.hat[, 1]/ sd(x1.hat[, 1])) * sqrt((1+rhoToS(rho.x1.est)^2)),
+                       x2 = (x2.hat[, 1]/ sd(x2.hat[, 1])) *  sqrt (1+rhoToS(rho.x2.est)^2) )
+
+library(eivtools)
+summary(eivreg(data = data.hat, 
+               formula = y~x1+x2, 
+               reliability = reliabilities))
+```
+Looking at the $X\prime X$ assumption of the EIV model, we see that the rescaled IRT estimates now show the same inflation as the classical error. 
+
+```{r}
+tx1x1 <- data.frame(True = t(as.matrix(x1)) %*% as.matrix(x1),
+                    IRT = t(as.matrix(x1.hat[, 1])) %*% as.matrix(x1.hat[, 1]),
+                    Classical = t(as.matrix(x1.classical)) %*% as.matrix(x1.classical),
+                    "IRT😎" = t(as.matrix(data.hat$x1)) %*% as.matrix(data.hat$x1), 
+                    check.names = F)
+
+
+kable(round(tx1x1,1))
+```
+
+
+So this obviously needs a lot more validation and systematic investigation, but the idea seems pretty promising as a way to extend classical error models to non-classical measurement error variables. 
+
+I'm sure I have at least somewhat reinvented the wheel here, but I couldn't find a good treatment of this problem anywhere and I urgently needed a solution for applied work. 
+
+
+[^dontuseltm]: I don't advise using the *LTM* package for IRT models. It has some bad behavior for graded response models described  [here](https://stats.stackexchange.com/questions/63891/is-r-output-reliable-specially-irt-package-ltm) that hasn't been fixed in a decade. I spent several days thinking I didn't understand IRT models because I couldn't recover simulation parameters with LTM. In my experience, MIRT is great at recovering parameters in simulations (and restored my sanity), so that's what I'm using here. A free paper idea for someone is to automatically go through replication packages that used LTM to check that MIRT gets the same results. The package has [nearly half a million](https://www.datasciencemeta.com/rpackages) downloads, so it has almost certainly created problems in the literature. 
+
+[^notimpute]: Many of the tricky issues I highlight in this post also apply to imputation and plausible value approaches. My overall impression is that overimputation and plausible values lead to more efficient estimates because they make much stronger assumptions about the relationships between variables. They also require that all relevant variables and their relationships are included in the modeling stage. This can get difficult if you want to estimate multiple latent scales with correlations that vary across groups. Error-in-variables regression, by contrast, can use IRT estimates that were generated without regards to a particular model usage. 
+
+
+
+[^reliabilityproof]: The reliability scores themselves might seem like a good initial guess, but these aren't actually measuring the correct correlation. They instead measure how similar two estimates of $X_1^{*}$ will be across draws. That's a large underestimate of $\rho(x_1^{*}, x_{1}^{irt})$. But it's a pretty simple fix. We can consider the correlation between independent IRT estimates of $x_1^{*}$ to represent this path diagram: $x_1^{irt} \leftarrow x_1^{*} \rightarrow x_1^{irt}\prime$. We can therefore treat $\rho(x_{1}^{irt}, x_{1}^{irt}\prime)$ as the product of the two paths (assumed to have equal correlations): $\rho(x_1^{*}, x_{1}^{irt}) \cdot \rho(x_1^{*}, x_{1}^{irt}\prime)$. $\rho(x_1^{*}, x_{1}^{irt}) = \sqrt{\rho(x_{1}^{irt}, x_{1}^{irt}\prime)}$. 
+
+
+# Correlation to standard deviation conversion
+
+$$
+\epsilon \sim \mathcal{N}(0, s) \\
+Var(b) = var(a + \epsilon) \\
+       = var(a) + var(\epsilon) \\
+       = 1 + s^2 \\
+$$
+
+$$
+Cov(a,b) = Cov(a,a+\epsilon) \\
+  =  var(a) + Cov(a,\epsilon) \\
+  = 1 + 0 \\  = 1
+$$
+
+
+$$
+\rho(a,b) = \frac{Cov(a,b)}{\sqrt{Var(a) \cdot Var(b)}} \\
+ = \frac{1}{\sqrt{ (1 + s^2)}} \\
+$$
+
+Rearranging to solve for $s$:
+$$
+\rho(a,b) = \frac{1}{\sqrt{1+s^2}} \\
+\sqrt{1+s^2} = \frac{1}{\rho(a,b)} \\ 
+1+s^2 = \bigg (\frac{1}{\rho(a,b)} \bigg )^2 \\ 
+s = \sqrt{ \bigg (\frac{1}{\rho(a,b)} \bigg )^2 - 1}
+$$
+
+
+
