@@ -20,10 +20,12 @@ output:
 always_allow_html: true
 ---
 
+<script src="{{< blogdown/postref >}}index_files/kePrint/kePrint.js"></script>
+<link href="{{< blogdown/postref >}}index_files/lightable/lightable.css" rel="stylesheet" />
 
 
-<p>One of the laments I often hear in social science is that we don’t take measurement error seriously enough. Fair enough! This blogpost is a record of me attempting to take it seriously. I’m going to focus on error-in-variables models in this post, but I’ve also been playing around with multiple over-imputation and plausible values, so other brands are available.<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a></p>
-<p>tl;dr measurement error is really hard to deal with, but error-in-variables regression seems to be able to play reasonably nicely with IRT models, with a bit of work.</p>
+<p>One of the laments I often hear in social science is that we don’t take measurement error seriously enough. Fair enough! This blogpost is a record of me attempting to take it seriously. I’m going to focus on error-in-variables models with IRT estimates in this post, but I’ve also been playing around with multiple over-imputation and plausible values, so other brands are available.<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a></p>
+<p>tl;dr measurement error is really hard to deal with, but error-in-variables regression seems to be able to play reasonably nicely with IRT models after a bit of work.</p>
 <div id="starting-simple" class="section level1">
 <h1>Starting simple</h1>
 <p>A few basics. Random measurement error on the dependent variable does not bias regression coefficients.</p>
@@ -33,205 +35,506 @@ y &lt;- x + rnorm(n)
 
 # y is observed with error:
 yobs &lt;- y + rnorm(n)
-
-lm(yobs~x)</code></pre>
-<pre><code>## 
-## Call:
-## lm(formula = yobs ~ x)
-## 
-## Coefficients:
-## (Intercept)            x  
-##    -0.04089      0.97970</code></pre>
+modelsummary(lm(yobs~x), gof_omit = &quot;.*&quot;) </code></pre>
+<table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:center;">
+ (1)
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:center;">
+−0.041
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+(0.045)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+x
+</td>
+<td style="text-align:center;">
+0.980
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+(0.045)
+</td>
+</tr>
+</tbody>
+</table>
 <p>By contrast, random error on an independent variable attenuates the regression coefficient:</p>
-<pre class="r"><code>xobs &lt;- x + rnorm(n)
-# x is observed with error:
-
-lm(y~xobs)</code></pre>
-<pre><code>## 
-## Call:
-## lm(formula = y ~ xobs)
-## 
-## Coefficients:
-## (Intercept)         xobs  
-##    -0.04887      0.53153</code></pre>
-<p>People often dismiss measurement error because it just makes our estimates more conservative. Besides the fact that that is still bad, it’s really only true for correctly specified single variable models. Take this example where Y is a combination of <span class="math inline">\(x_1\)</span> and <span class="math inline">\(x_2\)</span> and <span class="math inline">\(x_2\)</span> has measurement error.</p>
+<pre class="r"><code># x is observed with error:
+xobs &lt;- x + rnorm(n)
+modelsummary(lm(y~xobs), gof_omit = &quot;.*&quot;) </code></pre>
+<table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:center;">
+ (1)
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:center;">
+−0.049
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+(0.039)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+xobs
+</td>
+<td style="text-align:center;">
+0.532
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+(0.027)
+</td>
+</tr>
+</tbody>
+</table>
+<p>People often dismiss measurement error because it just makes our estimates more conservative. Besides the fact that that is still bad, it’s really only true for correctly specified single variable models. Take this example where Y is a combination of <span class="math inline">\(x_1\)</span> and <span class="math inline">\(x_2\)</span> and <span class="math inline">\(x_2\)</span> has measurement error (for the rest of this post, I’ll set <span class="math inline">\(x_1\)</span> and <span class="math inline">\(x_2\)</span> to have coefficients of 1).</p>
 <pre class="r"><code>x1 &lt;- rnorm(n)
 x2 &lt;- x1 + 0.5 * rnorm(n)
 x2 &lt;- scale(x2)[, ]
 y &lt;- x1 + x2 + rnorm(n)
+x2obs &lt;- x2 + rnorm(n, sd = 3)
 
-x2obs &lt;- x2 + rnorm(n)
-
-lm(y~x1 + x2obs)</code></pre>
-<pre><code>## 
-## Call:
-## lm(formula = y ~ x1 + x2obs)
-## 
-## Coefficients:
-## (Intercept)           x1        x2obs  
-##    0.005037     1.738066     0.189103</code></pre>
+modelsummary(lm(y~x1 + x2obs), gof_omit = &quot;.*&quot;) </code></pre>
+<table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:center;">
+ (1)
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:center;">
+−0.002
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+(0.034)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+x1
+</td>
+<td style="text-align:center;">
+1.884
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+(0.036)
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+x2obs
+</td>
+<td style="text-align:center;">
+0.028
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:center;">
+(0.011)
+</td>
+</tr>
+</tbody>
+</table>
 <p>While the coefficient on <span class="math inline">\(x_2\)</span> is attenuated, that leads to a large overestimation of the <span class="math inline">\(x_1\)</span> coefficient. This is much closer to the typical social science modeling situation where measurement error on our control variables could be flattering our preferred independent variables. It’s not unusual to see scholars lovingly measure their variable of interest and add in some noisy controls with the right names. This approach can and does lead to erroneous conclusions (see my <a href="https://www.filedrawer.blog/post/oster_pregnancy_alcohol/">previous post</a> for an example where this could be at work)</p>
 </div>
 <div id="error-in-variables" class="section level1">
 <h1>Error-in-variables</h1>
 <p>In the toy example, there are solutions. Here’s what an error-in-variables model from the <em>eivtools</em> package will give you when you tell it how much error <span class="math inline">\(x_2\)</span> was observed with:</p>
 <pre class="r"><code>library(eivtools)
+library(knitr)
+library(kableExtra)
+library(modelsummary)
 sigmas &lt;- diag(c(x1 = 0, x2obs = 1))^2
 rownames(sigmas) &lt;- colnames(sigmas) &lt;- c(&quot;x1&quot;, &quot;x2obs&quot;)
-summary(eivreg(data = data.frame(y, x1, x2obs), 
-               formula = y~x1 + x2obs, 
-               Sigma_error =  sigmas))</code></pre>
-<pre><code>## 
-## Call:
-## eivreg(formula = y ~ x1 + x2obs, data = data.frame(y, x1, x2obs), 
-##     Sigma_error = sigmas)
-## 
-## Error Covariance Matrix
-##       x1 x2obs
-## x1     0     0
-## x2obs  0     1
-## 
-## Residuals:
-##     Min      1Q  Median      3Q     Max 
-## -5.4792 -1.1754  0.0085  1.1932  6.0673 
-## 
-## Coefficients:
-##             Estimate Std. Error t value Pr(&gt;|t|)   
-## (Intercept)  0.08265    0.06295   1.313    0.189   
-## x1           0.60947    0.43768   1.393    0.164   
-## x2obs        1.42670    0.47959   2.975    0.003 **
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## Number of observations used: 1000 
-## Latent residual standard deviation: 0.9215 
-## Latent R-squared: 0.8244, (df-adjusted: 0.8239)
-## 
-## EIV-Adjusted vs Unadjusted Coefficients:
-##             Adjusted Unadjusted
-## (Intercept)  0.08265   0.005037
-## x1           0.60947   1.738066
-## x2obs        1.42670   0.189103</code></pre>
+eiv.basic &lt;- eivreg(data = data.frame(y, x1, x2obs), 
+                    formula = y~x1 + x2obs, 
+                    Sigma_error =  sigmas)
+kable(round(summarizeEIV(eiv.basic), 3), escape = F, booktabs = TRUE)</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+<span class="math inline">\(\beta_{EIV}\)</span>
+</th>
+<th style="text-align:right;">
+<span class="math inline">\(SE_{EIV}\)</span>
+</th>
+<th style="text-align:right;">
+<span class="math inline">\(\beta_{unadj}\)</span>
+</th>
+<th style="text-align:right;">
+<span class="math inline">\(SE_{unadj}\)</span>
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+-0.002
+</td>
+<td style="text-align:right;">
+0.034
+</td>
+<td style="text-align:right;">
+-0.002
+</td>
+<td style="text-align:right;">
+0.034
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+x1
+</td>
+<td style="text-align:right;">
+1.881
+</td>
+<td style="text-align:right;">
+0.033
+</td>
+<td style="text-align:right;">
+1.884
+</td>
+<td style="text-align:right;">
+0.036
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+x2obs
+</td>
+<td style="text-align:right;">
+0.032
+</td>
+<td style="text-align:right;">
+0.013
+</td>
+<td style="text-align:right;">
+0.028
+</td>
+<td style="text-align:right;">
+0.011
+</td>
+</tr>
+</tbody>
+</table>
 <p>Not bad! Both estimates now have confidence intervals that include the true value and the error in <span class="math inline">\(x_2\)</span> has been accounted for.</p>
 <p>What about if <span class="math inline">\(x_1\)</span> has error as well?</p>
-<pre class="r"><code>set.seed(3873)
+<pre class="r"><code>set.seed(373)
 x1 &lt;- rnorm(n)
 x2 &lt;- x1 + 0.5 * rnorm(n)
 x2 &lt;- scale(x2)[, ]
-y &lt;- x1 + x2 + rnorm(n)
+y &lt;- x1 - x2 + rnorm(n)
 
 x2obs &lt;- x2 + rnorm(n)
 x1obs &lt;- x1 + 0.5 * rnorm(n)
 
 sigmas &lt;- diag(c(x1obs = 0.5, x2obs = 1))^2
 rownames(sigmas) &lt;- colnames(sigmas) &lt;- c(&quot;x1obs&quot;, &quot;x2obs&quot;)
-summary(eivreg(data = data.frame(y, x1obs, x2obs), 
-               formula = y~x1obs + x2obs, 
-               Sigma_error =  sigmas))</code></pre>
-<pre><code>## 
-## Call:
-## eivreg(formula = y ~ x1obs + x2obs, data = data.frame(y, x1obs, 
-##     x2obs), Sigma_error = sigmas)
-## 
-## Error Covariance Matrix
-##       x1obs x2obs
-## x1obs  0.25     0
-## x2obs  0.00     1
-## 
-## Residuals:
-##     Min      1Q  Median      3Q     Max 
-## -4.5298 -0.9901 -0.0102  0.9167  4.3007 
-## 
-## Coefficients:
-##             Estimate Std. Error t value        Pr(&gt;|t|)    
-## (Intercept) -0.08864    0.04581  -1.935          0.0533 .  
-## x1obs        1.21675    0.18494   6.579 0.0000000000763 ***
-## x2obs        0.76472    0.18805   4.067 0.0000514494063 ***
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## Number of observations used: 1000 
-## Latent residual standard deviation: 1.029 
-## Latent R-squared: 0.7765, (df-adjusted: 0.7758)
-## 
-## EIV-Adjusted vs Unadjusted Coefficients:
-##             Adjusted Unadjusted
-## (Intercept) -0.08864   -0.07304
-## x1obs        1.21675    1.23313
-## x2obs        0.76472    0.39122</code></pre>
+eiv.basic.both.err &lt;- eivreg(data = data.frame(y, x1obs, x2obs), 
+                             formula = y~x1obs + x2obs, 
+                             Sigma_error =  sigmas)
+kable(round(summarizeEIV(eiv.basic.both.err), 3), escape = F)</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+<span class="math inline">\(\beta_{EIV}\)</span>
+</th>
+<th style="text-align:right;">
+<span class="math inline">\(SE_{EIV}\)</span>
+</th>
+<th style="text-align:right;">
+<span class="math inline">\(\beta_{unadj}\)</span>
+</th>
+<th style="text-align:right;">
+<span class="math inline">\(SE_{unadj}\)</span>
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+0.017
+</td>
+<td style="text-align:right;">
+0.066
+</td>
+<td style="text-align:right;">
+-0.065
+</td>
+<td style="text-align:right;">
+0.033
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+x1obs
+</td>
+<td style="text-align:right;">
+1.060
+</td>
+<td style="text-align:right;">
+0.426
+</td>
+<td style="text-align:right;">
+0.218
+</td>
+<td style="text-align:right;">
+0.035
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+x2obs
+</td>
+<td style="text-align:right;">
+-1.022
+</td>
+<td style="text-align:right;">
+0.477
+</td>
+<td style="text-align:right;">
+-0.095
+</td>
+<td style="text-align:right;">
+0.029
+</td>
+</tr>
+</tbody>
+</table>
 <p>Still not bad actually. But you’ll notice a set.seed line has appeared in the code above. That’s because the error-in-variables estimates are a lot more variable across simulations when both variables have error. Here’s another seed where it doesn’t work quite as nicely:</p>
-<pre><code>## 
-## Call:
-## eivreg(formula = y ~ x1 + x2, data = data.frame(y, x1 = x1obs, 
-##     x2 = x2obs), Sigma_error = sigmas)
-## 
-## Error Covariance Matrix
-##      x1 x2
-## x1 0.25  0
-## x2 0.00  1
-## 
-## Residuals:
-##     Min      1Q  Median      3Q     Max 
-## -4.9713 -1.0467  0.0036  1.1069  5.7628 
-## 
-## Coefficients:
-##             Estimate Std. Error t value Pr(&gt;|t|)    
-## (Intercept)  0.01111    0.05240   0.212 0.832185    
-## x1           0.67948    0.32819   2.070 0.038673 *  
-## x2           1.32199    0.34602   3.821 0.000141 ***
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## Number of observations used: 1000 
-## Latent residual standard deviation: 0.8844 
-## Latent R-squared: 0.8319, (df-adjusted: 0.8314)
-## 
-## EIV-Adjusted vs Unadjusted Coefficients:
-##             Adjusted Unadjusted
-## (Intercept)  0.01111  -0.003866
-## x1           0.67948   1.172127
-## x2           1.32199   0.451021</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+<span class="math inline">\(\beta_{EIV}\)</span>
+</th>
+<th style="text-align:right;">
+<span class="math inline">\(SE_{EIV}\)</span>
+</th>
+<th style="text-align:right;">
+<span class="math inline">\(\beta_{unadj}\)</span>
+</th>
+<th style="text-align:right;">
+<span class="math inline">\(SE_{unadj}\)</span>
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+0.011
+</td>
+<td style="text-align:right;">
+0.052
+</td>
+<td style="text-align:right;">
+-0.004
+</td>
+<td style="text-align:right;">
+0.040
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+x1
+</td>
+<td style="text-align:right;">
+0.679
+</td>
+<td style="text-align:right;">
+0.328
+</td>
+<td style="text-align:right;">
+1.172
+</td>
+<td style="text-align:right;">
+0.043
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+x2
+</td>
+<td style="text-align:right;">
+1.322
+</td>
+<td style="text-align:right;">
+0.346
+</td>
+<td style="text-align:right;">
+0.451
+</td>
+<td style="text-align:right;">
+0.034
+</td>
+</tr>
+</tbody>
+</table>
 <p>We can also specify the error using reliability instead of a covariance matrix to specify the error structure. Assuming your measurement of reliability is good, the results come out pretty similarly:</p>
 <pre class="r"><code># simulating new observations of x1 and x2 to estimate reliability
 x1.reliability &lt;- mean(replicate(100, cor(cbind(x1obs, (x1 + (0.5 * rnorm(n)))))[1,2]))
 x2.reliability &lt;- mean(replicate(100, cor(cbind(x2obs, (x2 + (rnorm(n)))))[1,2]))
 
-summary(eivreg(data = data.frame(y = y, x1 = x1obs, x2 = x2obs), 
-               formula = y~x1 + x2, 
-               reliability =  c(x1 = x1.reliability, x2 = x2.reliability)))</code></pre>
-<pre><code>## 
-## Call:
-## eivreg(formula = y ~ x1 + x2, data = data.frame(y = y, x1 = x1obs, 
-##     x2 = x2obs), reliability = c(x1 = x1.reliability, x2 = x2.reliability))
-## 
-## Reliability:
-##     x1     x2 
-## 0.7991 0.5011 
-## 
-## Residuals:
-##     Min      1Q  Median      3Q     Max 
-## -5.0772 -1.0803  0.0189  1.1163  5.8926 
-## 
-## Coefficients:
-##             Estimate Std. Error t value  Pr(&gt;|t|)    
-## (Intercept)  0.01252    0.05424   0.231    0.8176    
-## x1           0.61592    0.34932   1.763    0.0782 .  
-## x2           1.39157    0.34407   4.044 0.0000565 ***
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## Number of observations used: 1000 
-## Latent residual standard deviation: 0.8738 
-## Latent R-squared: 0.8359, (df-adjusted: 0.8354)
-## 
-## EIV-Adjusted vs Unadjusted Coefficients:
-##             Adjusted Unadjusted
-## (Intercept)  0.01252  -0.003866
-## x1           0.61592   1.172127
-## x2           1.39157   0.451021</code></pre>
+eiv.reliability.mod &lt;- eivreg(data = data.frame(y = y, x1 = x1obs, x2 = x2obs), 
+                              formula = y~x1 + x2, 
+                              reliability =  c(x1 = x1.reliability, x2 = x2.reliability))
+
+kable(round(summarizeEIV(eiv.reliability.mod ), 3))</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+<span class="math inline">\(\beta_{EIV}\)</span>
+</th>
+<th style="text-align:right;">
+<span class="math inline">\(SE_{EIV}\)</span>
+</th>
+<th style="text-align:right;">
+<span class="math inline">\(\beta_{unadj}\)</span>
+</th>
+<th style="text-align:right;">
+<span class="math inline">\(SE_{unadj}\)</span>
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+0.013
+</td>
+<td style="text-align:right;">
+0.054
+</td>
+<td style="text-align:right;">
+-0.004
+</td>
+<td style="text-align:right;">
+0.040
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+x1
+</td>
+<td style="text-align:right;">
+0.616
+</td>
+<td style="text-align:right;">
+0.349
+</td>
+<td style="text-align:right;">
+1.172
+</td>
+<td style="text-align:right;">
+0.043
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+x2
+</td>
+<td style="text-align:right;">
+1.392
+</td>
+<td style="text-align:right;">
+0.344
+</td>
+<td style="text-align:right;">
+0.451
+</td>
+<td style="text-align:right;">
+0.034
+</td>
+</tr>
+</tbody>
+</table>
 </div>
 <div id="multiple-items" class="section level1">
 <h1>Multiple items</h1>
 <p>OK now let’s move to the scenario I’m actually grappling with: multiple ordinal indicators for the same latent variable. This is a ubiquitous situation in survey research. Examples include measuring personality traits, authoritarianism, or depression with multiple questions. Survey researchers used to simply add the questions together to build these kind of scales. However, this is a highly inefficient use of the information available because different questions have different levels of performance when assessing different parts of the underlying scale.</p>
-<p>Instead, item response theory (IRT) models, treat the survey questions as being generated from an underlying latent variable <span class="math inline">\(\theta\)</span>, with the relationship between <span class="math inline">\(\theta\)</span> and indicator estimated separately for each question.</p>
+<p>Instead, item response theory (IRT) models, treat the survey questions as being generated from an underlying latent variable <span class="math inline">\(\theta\)</span>, with the relationship between <span class="math inline">\(\theta\)</span> and indicator estimated separately for each question through functional forms such as: <span class="math inline">\(P(x_{1q}=1|\theta,a,b)=\frac{e^{a(\theta-b)}}{1+e^{a(\theta-b)}}\)</span> for the 2PL model.</p>
 <p>Here’s a quick simulation of some data generated for this type of model. I generate binary items here, but IRT is extended straightforwardly to the ordinal case.</p>
 <pre class="r"><code>library(mirt)
+set.seed(487)
 n &lt;- 1000
 cat &lt;- sample(0:1, n, replace = T)
 x1 &lt;- rnorm(n) 
@@ -240,7 +543,7 @@ x2 &lt;- rnorm(n,2)  + x1 + cat
 x2 &lt;- scale(x2)[, ]
 
 alpha &lt;- 1
-y &lt;- alpha + x1 - x2  + rnorm(n, 3)
+y &lt;- alpha + x1 + x2  + rnorm(n, 3)
 
 x1a &lt;- rbinom(prob = plogis(x1 * 2 + rnorm(n, sd=1)- 1) , size = 1, n=n)
 x1b &lt;- rbinom(prob = plogis(x1 * 0.25 + rnorm(n, sd=1)+1), size = 1, n=n)
@@ -264,22 +567,39 @@ x2.hat &lt;- fscores(x2.mod, full.scores= TRUE, full.scores.SE = TRUE, method = 
 <p>These scores are correlated pretty strongly with the underlying latent variable:</p>
 <table>
 <thead>
-<tr class="header">
-<th align="left"></th>
-<th align="right">x1</th>
-<th align="right">x2</th>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+IRT
+</th>
+<th style="text-align:right;">
+Sum
+</th>
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
-<td align="left">IRT</td>
-<td align="right">0.780</td>
-<td align="right">0.661</td>
+<tr>
+<td style="text-align:left;">
+x1
+</td>
+<td style="text-align:right;">
+0.786
+</td>
+<td style="text-align:right;">
+0.642
+</td>
 </tr>
-<tr class="even">
-<td align="left">Sum</td>
-<td align="right">0.646</td>
-<td align="right">0.554</td>
+<tr>
+<td style="text-align:left;">
+x2
+</td>
+<td style="text-align:right;">
+0.603
+</td>
+<td style="text-align:right;">
+0.539
+</td>
 </tr>
 </tbody>
 </table>
@@ -293,42 +613,87 @@ lm(data = basic.irt.data,
 ## 
 ## Coefficients:
 ## (Intercept)           x1           x2  
-##      4.0032       0.5417      -0.5102</code></pre>
+##       4.015        1.334        1.044</code></pre>
 <p>MIRT has a bunch of useful tools to help us here including a function for estimating the reliability of the IRT scores. So let’s use those to calculate reliabilities and plug those into the error-in-variable model:</p>
 <pre class="r"><code>reliabilities &lt;- c(x1 = as.vector(empirical_rxx(x1.hat)),
                    x2 = as.vector(empirical_rxx(x2.hat)))
-
-summary(eivreg(data = basic.irt.data, 
+naive.irt.eiv.mod &lt;- eivreg(data = basic.irt.data, 
                formula = y~x1+x2, 
-               reliability = reliabilities))</code></pre>
-<pre><code>## 
-## Call:
-## eivreg(formula = y ~ x1 + x2, data = basic.irt.data, reliability = reliabilities)
-## 
-## Reliability:
-##     x1     x2 
-## 0.5653 0.5224 
-## 
-## Residuals:
-##     Min      1Q  Median      3Q     Max 
-## -5.2521 -1.1145  0.0727  1.1462  4.8758 
-## 
-## Coefficients:
-##             Estimate Std. Error t value             Pr(&gt;|t|)    
-## (Intercept)  4.00325    0.05391  74.257 &lt; 0.0000000000000002 ***
-## x1           1.91101    0.28535   6.697      0.0000000000355 ***
-## x2          -2.00143    0.30775  -6.503      0.0000000001239 ***
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## Number of observations used: 1000 
-## Latent residual standard deviation: 1.007 
-## Latent R-squared: 0.4085, (df-adjusted: 0.4067)
-## 
-## EIV-Adjusted vs Unadjusted Coefficients:
-##             Adjusted Unadjusted
-## (Intercept)    4.003     4.0032
-## x1             1.911     0.5417
-## x2            -2.001    -0.5102</code></pre>
+               reliability = reliabilities)
+kable(round(summarizeEIV(naive.irt.eiv.mod ), 3))</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+<span class="math inline">\(\beta_{EIV}\)</span>
+</th>
+<th style="text-align:right;">
+<span class="math inline">\(SE_{EIV}\)</span>
+</th>
+<th style="text-align:right;">
+<span class="math inline">\(\beta_{unadj}\)</span>
+</th>
+<th style="text-align:right;">
+<span class="math inline">\(SE_{unadj}\)</span>
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+4.015
+</td>
+<td style="text-align:right;">
+0.056
+</td>
+<td style="text-align:right;">
+4.015
+</td>
+<td style="text-align:right;">
+0.047
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+x1
+</td>
+<td style="text-align:right;">
+1.515
+</td>
+<td style="text-align:right;">
+0.151
+</td>
+<td style="text-align:right;">
+1.334
+</td>
+<td style="text-align:right;">
+0.061
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+x2
+</td>
+<td style="text-align:right;">
+2.546
+</td>
+<td style="text-align:right;">
+0.287
+</td>
+<td style="text-align:right;">
+1.044
+</td>
+<td style="text-align:right;">
+0.080
+</td>
+</tr>
+</tbody>
+</table>
 <p>We certainly seem to have solved our attenuation bias problem, but now we seem to have the opposite issue. Our regression coefficients are substantially inflated.</p>
 </div>
 <div id="making-irt-play-nice-with-eiv" class="section level1">
@@ -342,39 +707,59 @@ summary(eivreg(data = basic.irt.data,
 sd(x1)</code></pre>
 <pre><code>## [1] 1</code></pre>
 <pre class="r"><code>sd(x1.classical)</code></pre>
-<pre><code>## [1] 1.292819</code></pre>
+<pre><code>## [1] 1.267955</code></pre>
 <p>But this isn’t what happens with IRT estimates. Our <span class="math inline">\(x_1^{IRT}\)</span> IRT estimates from earlier are actually underdispersed compared to the true value. This is because IRT estimates are based on a Bayesian approach that applies shrinkage.</p>
 <pre class="r"><code>sd(x1.hat[, 1])</code></pre>
-<pre><code>## [1] 0.7521141</code></pre>
+<pre><code>## [1] 0.8124328</code></pre>
 <p>This is despite the fact the classical error variable <span class="math inline">\(x_{1}^{classical}\)</span> and IRT estimate <span class="math inline">\(x_1^{IRT}\)</span> are similarly correlated with the underlying variable <span class="math inline">\(x_1^{*}\)</span>.</p>
 <table>
 <thead>
-<tr class="header">
-<th align="right">IRT</th>
-<th align="right">Classical</th>
+<tr>
+<th style="text-align:right;">
+IRT
+</th>
+<th style="text-align:right;">
+Classical
+</th>
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
-<td align="right">0.78</td>
-<td align="right">0.765</td>
+<tr>
+<td style="text-align:right;">
+0.786
+</td>
+<td style="text-align:right;">
+0.759
+</td>
 </tr>
 </tbody>
 </table>
 <p>I think this difference is crucial for understanding why error-in-variables regression doesn’t work well with IRT estimates out of the box. Error-in-variables regression is built around the <a href="https://journals.sagepub.com/doi/10.1177/1536867X20909692">assumption</a> that “the diagonal elements of <span class="math inline">\(X\prime X\)</span> are inflated relative to the corresponding diagonal elements of <span class="math inline">\(X^{*}\prime X^{*}\)</span>”. How do the classical and IRT estimates of <span class="math inline">\(x_1^{*}\)</span> hold up against this assumption? Here are those quantities for the original variable, IRT estimate of the variable, and classical error estimate of the variable. The classical error variable follows the EIV assumptions whereas the IRT has the opposite bias.</p>
 <table>
-<thead>
-<tr class="header">
-<th align="right">True</th>
-<th align="right">IRT</th>
-<th align="right">Classical</th>
-</tr>
-</thead>
 <tbody>
-<tr class="odd">
-<td align="right">999</td>
-<td align="right">565.1</td>
-<td align="right">1669.8</td>
+<tr>
+<td style="text-align:left;">
+True
+</td>
+<td style="text-align:right;">
+999.0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+IRT
+</td>
+<td style="text-align:right;">
+659.4
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Classical
+</td>
+<td style="text-align:right;">
+1606.4
+</td>
 </tr>
 </tbody>
 </table>
@@ -401,53 +786,117 @@ data.hat &lt;- data.frame(y, x1 = (x1.hat[, 1]/ sd(x1.hat[, 1])) * sqrt((1+rhoTo
                        x2 = (x2.hat[, 1]/ sd(x2.hat[, 1])) *  sqrt (1+rhoToS(rho.x2.est)^2) )
 
 library(eivtools)
-summary(eivreg(data = data.hat, 
+cool.irt.eiv.mod &lt;- eivreg(data = data.hat, 
                formula = y~x1+x2, 
-               reliability = reliabilities))</code></pre>
-<pre><code>## 
-## Call:
-## eivreg(formula = y ~ x1 + x2, data = data.hat, reliability = reliabilities)
-## 
-## Reliability:
-##     x1     x2 
-## 0.5653 0.5224 
-## 
-## Residuals:
-##     Min      1Q  Median      3Q     Max 
-## -5.2521 -1.1145  0.0727  1.1462  4.8758 
-## 
-## Coefficients:
-##             Estimate Std. Error t value             Pr(&gt;|t|)    
-## (Intercept)  4.00325    0.05391  74.257 &lt; 0.0000000000000002 ***
-## x1           1.08069    0.16137   6.697      0.0000000000355 ***
-## x2          -1.04583    0.16081  -6.503      0.0000000001239 ***
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## Number of observations used: 1000 
-## Latent residual standard deviation: 1.007 
-## Latent R-squared: 0.4085, (df-adjusted: 0.4067)
-## 
-## EIV-Adjusted vs Unadjusted Coefficients:
-##             Adjusted Unadjusted
-## (Intercept)    4.003     4.0032
-## x1             1.081     0.3063
-## x2            -1.046    -0.2666</code></pre>
-<p>Looking at the <span class="math inline">\(X\prime X\)</span> assumption of the EIV model, we see that the rescaled IRT estimates now show the same inflation as the classical error.</p>
+               reliability = reliabilities)
+kable(round(summarizeEIV(cool.irt.eiv.mod ), 3))</code></pre>
 <table>
 <thead>
-<tr class="header">
-<th align="right">True</th>
-<th align="right">IRT</th>
-<th align="right">Classical</th>
-<th align="right">IRT😎</th>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+<span class="math inline">\(\beta_{EIV}\)</span>
+</th>
+<th style="text-align:right;">
+<span class="math inline">\(SE_{EIV}\)</span>
+</th>
+<th style="text-align:right;">
+<span class="math inline">\(\beta_{unadj}\)</span>
+</th>
+<th style="text-align:right;">
+<span class="math inline">\(SE_{unadj}\)</span>
+</th>
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
-<td align="right">999</td>
-<td align="right">565.1</td>
-<td align="right">1669.8</td>
-<td align="right">1767.1</td>
+<tr>
+<td style="text-align:left;">
+(Intercept)
+</td>
+<td style="text-align:right;">
+4.015
+</td>
+<td style="text-align:right;">
+0.056
+</td>
+<td style="text-align:right;">
+4.015
+</td>
+<td style="text-align:right;">
+0.047
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+x1
+</td>
+<td style="text-align:right;">
+0.999
+</td>
+<td style="text-align:right;">
+0.100
+</td>
+<td style="text-align:right;">
+0.880
+</td>
+<td style="text-align:right;">
+0.040
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+x2
+</td>
+<td style="text-align:right;">
+0.975
+</td>
+<td style="text-align:right;">
+0.110
+</td>
+<td style="text-align:right;">
+0.400
+</td>
+<td style="text-align:right;">
+0.031
+</td>
+</tr>
+</tbody>
+</table>
+<p>Looking at the <span class="math inline">\(X\prime X\)</span> assumption of the EIV model, we see that the rescaled IRT estimates now show the same inflation as the classical error.</p>
+<table>
+<tbody>
+<tr>
+<td style="text-align:left;">
+True
+</td>
+<td style="text-align:right;">
+999.0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+IRT
+</td>
+<td style="text-align:right;">
+659.4
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Classical
+</td>
+<td style="text-align:right;">
+1606.4
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+IRT😎
+</td>
+<td style="text-align:right;">
+1515.0
+</td>
 </tr>
 </tbody>
 </table>
@@ -458,24 +907,36 @@ summary(eivreg(data = data.hat,
 <h1>Correlation to standard deviation conversion</h1>
 <p><span class="math display">\[
 \epsilon \sim \mathcal{N}(0, s) \\
+\]</span></p>
+<p><span class="math display">\[
 Var(b) = var(a + \epsilon) \\
-       = var(a) + var(\epsilon) \\
-       = 1 + s^2 \\
+= var(a) + var(\epsilon) \\
+= 1 + s^2 \\
 \]</span></p>
 <p><span class="math display">\[
 Cov(a,b) = Cov(a,a+\epsilon) \\
-  =  var(a) + Cov(a,\epsilon) \\
-  = 1 + 0 \\  = 1
+\]</span></p>
+<p><span class="math display">\[
+=  var(a) + Cov(a,\epsilon) \\
+\]</span></p>
+<p><span class="math display">\[
+= 1 + 0 \\  = 1
 \]</span></p>
 <p><span class="math display">\[
 \rho(a,b) = \frac{Cov(a,b)}{\sqrt{Var(a) \cdot Var(b)}} \\
 = \frac{1}{\sqrt{ (1 + s^2)}} \\
 \]</span></p>
-<p>Rearranging to solve for <span class="math inline">\(s\)</span>:
-<span class="math display">\[
+<p>Rearranging to solve for <span class="math inline">\(s\)</span>:</p>
+<p><span class="math display">\[
 \rho(a,b) = \frac{1}{\sqrt{1+s^2}} \\
+\]</span></p>
+<p><span class="math display">\[
 \sqrt{1+s^2} = \frac{1}{\rho(a,b)} \\
+\]</span></p>
+<p><span class="math display">\[
 1+s^2 = \bigg (\frac{1}{\rho(a,b)} \bigg )^2 \\
+\]</span></p>
+<p><span class="math display">\[
 s = \sqrt{ \bigg (\frac{1}{\rho(a,b)} \bigg )^2 - 1}
 \]</span></p>
 </div>
