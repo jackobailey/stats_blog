@@ -218,7 +218,7 @@ rownames(cors.sum.irt) <- c("IRT", "Sum")
 kable(t(round(cors.sum.irt,3)))
 ```
 
-However, if you just plug the IRT estimates into a regression it doesn't look took good: both the coefficients are attenuated.[^irtattenuate] $x_1$'s coefficient should be 1 and $x_2$'s coefficient should be -1. Clearly, we need to account for the measurement error. 
+However, if you just plug the IRT estimates into a regression it doesn't look too good: both the coefficients are attenuated.[^irtattenuate] $x_1$'s coefficient should be 1 and $x_2$'s coefficient should be -1. Clearly, we need to account for the measurement error. 
 
 ```{r, echo = T}
 basic.irt.data <- data.frame(x1 = x1.hat[, 1], 
@@ -308,11 +308,6 @@ $$
 
 ```{r, echo = T}
 
-```
-
-OK enough equations. Does it work?
-```{r, echo = T}
-
 rhoToS <- function(rho) {
   s <- sqrt((1 / rho)^2 - 1)  
   return(s)
@@ -322,6 +317,11 @@ rho.x2.est <- sqrt(empirical_rxx(x2.hat))
 data.hat <- data.frame(y, x1 = (x1.hat[, 1]/ sd(x1.hat[, 1])) * sqrt((1+rhoToS(rho.x1.est)^2)),
                        x2 = (x2.hat[, 1]/ sd(x2.hat[, 1])) *  sqrt (1+rhoToS(rho.x2.est)^2) )
 
+```
+
+OK enough equations. Does it work?
+
+```{r, echo = T}
 library(eivtools)
 cool.irt.eiv.mod <- eivreg(data = data.hat, 
                formula = y~x1+x2, 
@@ -331,7 +331,7 @@ kable(round(summarizeEIV(cool.irt.eiv.mod ), 3))
 
 ```
 
-It certainly seems to improve things. 
+It certainly seems to improve things! 
 
 
 Looking at the $X\prime X$ assumption of the EIV model, we see that the rescaled IRT estimates now show the same inflation as the classical error. 
@@ -350,7 +350,7 @@ kable(t(round(tx1x1,1)))
 
 So this obviously needs a lot more validation and systematic investigation, but the idea seems pretty promising as a way to extend classical error models to non-classical measurement error variables. 
 
-I'm sure I have at least somewhat reinvented the wheel here, but I couldn't find a good treatment of this problem anywhere and I urgently needed a solution for applied work. 
+I'm sure I have at least somewhat reinvented the wheel here, but I couldn't find a good treatment of this problem anywhere and I urgently needed a solution for applied work. At the very least, this is not a widely enough known/accepted solution to make it into [this](https://measurementinstrumentssocialscience.biomedcentral.com/articles/10.1186/s42409-020-00020-5) treatment of using IRT scores in regression models. 
 
 
 [^dontuseltm]: I don't advise using the *LTM* package for IRT models. It has some bad behavior for graded response models described  [here](https://stats.stackexchange.com/questions/63891/is-r-output-reliable-specially-irt-package-ltm) that hasn't been fixed in a decade. I spent several days thinking I didn't understand IRT models because I couldn't recover simulation parameters with LTM. In my experience, MIRT is great at recovering parameters in simulations (and restored my sanity), so that's what I'm using here. A free paper idea for someone is to automatically go through replication packages that used LTM to check that MIRT gets the same results. The package has [nearly half a million](https://www.datasciencemeta.com/rpackages) downloads, so it has almost certainly created problems in the literature. 

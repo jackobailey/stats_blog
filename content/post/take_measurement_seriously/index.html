@@ -531,7 +531,7 @@ x2
 </tr>
 </tbody>
 </table>
-<p>However, if you just plug the IRT estimates into a regression it doesn’t look took good: both the coefficients are attenuated.<a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a> <span class="math inline">\(x_1\)</span>’s coefficient should be 1 and <span class="math inline">\(x_2\)</span>’s coefficient should be -1. Clearly, we need to account for the measurement error.</p>
+<p>However, if you just plug the IRT estimates into a regression it doesn’t look too good: both the coefficients are attenuated.<a href="#fn3" class="footnote-ref" id="fnref3"><sup>3</sup></a> <span class="math inline">\(x_1\)</span>’s coefficient should be 1 and <span class="math inline">\(x_2\)</span>’s coefficient should be -1. Clearly, we need to account for the measurement error.</p>
 <pre class="r"><code>basic.irt.data &lt;- data.frame(x1 = x1.hat[, 1], 
                              x2 = x2.hat[, 1], y)
 modelsummary(lm(data = basic.irt.data, 
@@ -755,7 +755,6 @@ s = \sqrt{ \bigg (\frac{1}{\rho(x_1^{classical},x_1^{*})} \bigg )^2 - 1}
 <p><span class="math display">\[
 x_{1}^{irt😎}  = \frac{x_{1}^{irt}}{Var \big (x_{1}^{irt} \big )^ 2} \cdot \Bigg ( 1+\sqrt{ \bigg (\frac{1}{\rho(x_1^{irt},x_1^{*})} \bigg )^2 - 1} \Bigg )
 \]</span></p>
-<p>OK enough equations. Does it work?</p>
 <pre class="r"><code>rhoToS &lt;- function(rho) {
   s &lt;- sqrt((1 / rho)^2 - 1)  
   return(s)
@@ -763,9 +762,9 @@ x_{1}^{irt😎}  = \frac{x_{1}^{irt}}{Var \big (x_{1}^{irt} \big )^ 2} \cdot \Bi
 rho.x1.est &lt;- sqrt(empirical_rxx(x1.hat))
 rho.x2.est &lt;- sqrt(empirical_rxx(x2.hat))
 data.hat &lt;- data.frame(y, x1 = (x1.hat[, 1]/ sd(x1.hat[, 1])) * sqrt((1+rhoToS(rho.x1.est)^2)),
-                       x2 = (x2.hat[, 1]/ sd(x2.hat[, 1])) *  sqrt (1+rhoToS(rho.x2.est)^2) )
-
-library(eivtools)
+                       x2 = (x2.hat[, 1]/ sd(x2.hat[, 1])) *  sqrt (1+rhoToS(rho.x2.est)^2) )</code></pre>
+<p>OK enough equations. Does it work?</p>
+<pre class="r"><code>library(eivtools)
 cool.irt.eiv.mod &lt;- eivreg(data = data.hat, 
                formula = y~x1+x2, 
                reliability = reliabilities)
@@ -843,7 +842,7 @@ x2
 </tr>
 </tbody>
 </table>
-<p>It certainly seems to improve things.</p>
+<p>It certainly seems to improve things!</p>
 <p>Looking at the <span class="math inline">\(X\prime X\)</span> assumption of the EIV model, we see that the rescaled IRT estimates now show the same inflation as the classical error.</p>
 <table>
 <tbody>
@@ -882,7 +881,7 @@ IRT😎
 </tbody>
 </table>
 <p>So this obviously needs a lot more validation and systematic investigation, but the idea seems pretty promising as a way to extend classical error models to non-classical measurement error variables.</p>
-<p>I’m sure I have at least somewhat reinvented the wheel here, but I couldn’t find a good treatment of this problem anywhere and I urgently needed a solution for applied work.</p>
+<p>I’m sure I have at least somewhat reinvented the wheel here, but I couldn’t find a good treatment of this problem anywhere and I urgently needed a solution for applied work. At the very least, this is not a widely enough known/accepted solution to make it into <a href="https://measurementinstrumentssocialscience.biomedcentral.com/articles/10.1186/s42409-020-00020-5">this</a> treatment of using IRT scores in regression models.</p>
 </div>
 <div id="correlation-to-standard-deviation-conversion" class="section level1">
 <h1>Correlation to standard deviation conversion</h1>
