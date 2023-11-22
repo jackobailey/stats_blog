@@ -1,0 +1,84 @@
+---
+title: The Strange Selection Bias in LASSO
+author: "Jon Mellon (some plots created by Chris Prosser but we don't 100% agree on interpretation yet)"
+date: 2023-11-22T21:09:33-05:00
+categories: ["r", "dummy variables"]
+tags: ["r", "dummy variables"]
+math: true
+---
+
+
+
+<p>Let’s suppose you have two variables <span class="math inline">\(X\)</span> and <span class="math inline">\(Z\)</span> that are positively correlated. <span class="math inline">\(X\)</span> causes <span class="math inline">\(Y\)</span> but <span class="math inline">\(Z\)</span> does not.</p>
+<pre class="r"><code>n = 100
+x &lt;- rnorm(n)
+z= x + rnorm(n)
+x=scale(x)[,]
+z=scale(z)[,]
+y=x+rnorm(n)</code></pre>
+<p>The true value of <span class="math inline">\(\beta_z\)</span> should be 0 and <span class="math inline">\(\beta_x\)</span> should be 1 in the model <span class="math inline">\(y=\beta_x x + \beta_z z\)</span>. If we simulate this a bunch of times and estimate using OLS that’s exactly what we find on average. However, penalized regressions sacrifice the promise of unbiased estimates for other properties such as lower MSE and variable selection.</p>
+<p>If we estimate the model using ridge regression, we end up seeing a substantial bias on <span class="math inline">\(\hat{\beta}_z\)</span>. The histogram below shows the distribution of ridge regression estimates of <span class="math inline">\(\beta_z\)</span> from a ridge estimator with <span class="math inline">\(\lambda\)</span> of 0.1.</p>
+<pre class="r"><code>simRidge &lt;- function() {
+  n = 100
+  x &lt;- rnorm(n)
+  z= x + rnorm(n)
+  x=scale(x)[,]
+  z=scale(z)[,]
+  y=x+rnorm(n)
+  
+  ridgemod&lt;- lmridge(data = data.frame(y=y, x=x, z=z), 
+          formula = y~x+z, K= 0.1)
+  return(ridgemod$coef[&quot;z&quot;, ])
+}
+
+ridge.z.coefs &lt;- replicate(1000, simRidge())
+ggplot(data=  data.frame(Z = ridge.z.coefs), aes(x = Z)) + 
+  geom_histogram() + geom_vline(xintercept = mean(ridge.z.coefs), 
+                                colour = &quot;red&quot;, linetype = 2)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<p>This is explicable when we examine the ridge regression loss function:</p>
+<p><span class="math display">\[\begin{equation}
+L_{ridge}(\hat{\beta}_{ridge}) =  \sum_{i=1}^{M}{ \bigg (y_i - \sum_{j=0}^{p} \hat{\beta}_{ridge_{j}} \cdot X[i, j] } \bigg ) ^2 + \frac{\lambda_2}{2} \sum^p_{j=1} {\hat{\beta}_{ridge_{j}}}^2
+\end{equation}\]</span></p>
+<p>The important part here is the squared penalty term. That means that the estimator will prefer adding mass to a smaller coefficient than a larger one. Suppose that <span class="math inline">\(\hat{\beta}_x\)</span> is currently 1 <span class="math inline">\(\hat{\beta}_z\)</span> is 0.1. That would create a ridge penalty of <span class="math inline">\(1^2+0.1^2=1.01\)</span>. If we add 0.1 to <span class="math inline">\(\hat{\beta}_x\)</span>, that increases the total ridge penalty to <span class="math inline">\(1.1^2+0.1^2=1.22\)</span> whereas if we added 0.1 to <span class="math inline">\(\hat{\beta}_z\)</span> it would only increase the ridge penalty to <span class="math inline">\(1^2+0.2^2=1.04\)</span>. That means the ridge loss function tends to find solutions where the parameter for a correlated variable gets some mass at the expense of the larger variable’s parameter. That is why we see <span class="math inline">\(\hat{\beta}_z\)</span> get a positive value on average even though it is simulated as zero.</p>
+<p>Where things get weird is when we do the same thing for LASSO. While the bias is much smaller than for ridge models, it’s still there and in the same direction.</p>
+<pre class="r"><code>simLasso &lt;- function() {
+  n = 100
+  x &lt;- rnorm(n)
+  z= x + rnorm(n)
+  x=scale(x)[,]
+  z=scale(z)[,]
+  y=x+rnorm(n)  
+  
+  
+  gcdnetModel &lt;- gcdnet(y = y,
+                        x = cbind(x,z),
+                        lambda = c(0.02), 
+                        lambda2 = 0,
+                        standardize = FALSE,
+                        method = &quot;ls&quot;)
+  all.coefs &lt;- coef(gcdnetModel)
+  return(all.coefs[&quot;z&quot;, ])
+}
+
+lasso.z.coefs &lt;- replicate(10000, simLasso())
+ggplot(data=  data.frame(Z = lasso.z.coefs), aes(x = Z)) + 
+  geom_histogram(bins = 100) + geom_vline(xintercept = mean(lasso.z.coefs), 
+                                colour = &quot;red&quot;, linetype = 2)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<p>To see why that’s weird we can again consider the loss function:</p>
+<p><span class="math display">\[\begin{equation}
+L_{lasso}(\hat{\beta}_{lasso}) =  \sum_{i=1}^{M}{ \bigg (y_i - \sum_{j=0}^{p} \hat{\beta}_{lasso_{j}} \cdot X[i, j] } \bigg ) ^2 + \lambda_1 \sum^p_{j=1} {|\hat{\beta}_{lasso_{j}}|}
+\end{equation}\]</span></p>
+<p>The important thing here is that the LASSO loss works on the absolute value of the coefficient. Taking our previous example, adding 0.1 to <span class="math inline">\(\hat{\beta}_x\)</span>, increases the total LASSO penalty to <span class="math inline">\(1.1+0.1=1.2\)</span> exactly the same as if we added 0.1 to <span class="math inline">\(\hat{\beta}_z\)</span> <span class="math inline">\(1+0.2=1.2\)</span>. In other words, the LASSO penalty should be indifferent between adding mass to <span class="math inline">\(\hat{\beta}_x\)</span> and <span class="math inline">\(\hat{\beta}_z\)</span>. Given that we simulated <span class="math inline">\(\beta_z\)</span> to be zero, it is odd that the LASSO estimate is positive on average.</p>
+<p>I won’t detail all the dead ends we went down trying to figure this out, but I think we finally have the answer. The key is that while we simulate <span class="math inline">\(\beta_z\)</span> to be zero, in each simulation, an OLS estimate puts some coefficient mass on <span class="math inline">\(\beta_z\)</span>. In the OLS estimates, this is symmetrically distributed around zero. Sometimes <span class="math inline">\(\beta_z\)</span> is positive and sometimes negative. And it turns out that the LASSO estimator behaves quite differently depending on which of those scenarios is at play.</p>
+<p>Estimating the model using LASSO generally decreases the magnitude of <span class="math inline">\(\hat{\beta}_x\)</span>. Lower values of <span class="math inline">\(\hat{\beta}_x\)</span> increases the MSE of the model, which can potentially be reduced again by a larger magnitude of <span class="math inline">\(\hat{\beta}_z\)</span>. Of course, <span class="math inline">\(\hat{\beta}_z\)</span> can also have a larger magnitude by modeling the same variance it did in the OLS estimate. It turns out that these two goals are overlapping when the OLS estimate of <span class="math inline">\(\beta_z\)</span> was positive but work against each other when the OLS estimate of <span class="math inline">\(\beta_z\)</span> was negative.</p>
+<p>We capture where <span class="math inline">\(\hat{\beta}_z\)</span> reduces the MSE by defining <span class="math inline">\(\epsilon_z\)</span> as the residuals that <span class="math inline">\(\hat{\beta}_z\)</span> changes in the OLS estimate. We calculate these by comparing the OLS predictions <span class="math inline">\(\hat{y}_{OLS}=\beta_{xOLS} x + \hat{\beta}_{zOLS} z\)</span> to the predictions from the OLS model omitting the <span class="math inline">\(\hat{\beta}_{zOLS}\)</span> term <span class="math inline">\(\hat{y}_{OLSnoZ}=\beta_{xOLS} x\)</span>. <span class="math inline">\(\epsilon_z= \hat{y}_{OLS} - \hat{y}_{OLSnoZ}\)</span>.</p>
+<p>We then capture where reducing <span class="math inline">\(\hat{\beta}_x\)</span> increased MSE by defining <span class="math inline">\(\epsilon_x\)</span> as the residuals that are changed by reducing <span class="math inline">\(\hat{\beta}_x\)</span> from its OLS value to its LASSO value. This time, we compare the OLS predictions to <span class="math inline">\(\hat{y}_{OLS}\)</span> the OLS predictions if we swap <span class="math inline">\(\beta_{xOLS}\)</span> for the LASSO value <span class="math inline">\(\beta_{xLASSO}\)</span>: <span class="math inline">\(\hat{y}_{lassox}=\beta_{xLASSO} x + \hat{\beta}_{zOLS} z\)</span>. That means we finally define <span class="math inline">\(\epsilon_x= \hat{y}_{OLS} - \hat{y}_{xLASSO}\)</span>.</p>
+<p>The following figure shows the relationship between the errors created by reducing <span class="math inline">\(\hat{\beta}_x\)</span>, <span class="math inline">\(\epsilon_x\)</span>, and the errors reduced in the OLS estimate by giving <span class="math inline">\(\hat{\beta_z}\)</span> some coefficient mass: <span class="math inline">\(\epsilon_z\)</span>. For the case where <span class="math inline">\(\hat{\beta}_z\)</span> was negative in the OLS estimate, the two goals come into conflict because there is a negative correlation between the observations that <span class="math inline">\(\hat{\beta}_z\)</span> improves in the OLS estimate, and the variance that reducing <span class="math inline">\(\hat{\beta}_x\)</span> opens up for modeling after it is penalized by LASSO. However, for a simulation where <span class="math inline">\(\hat{\beta}_z\)</span> was positive in the OLS estimate, there is no tradeoff between these goals. A larger <span class="math inline">\(\hat{\beta}_z\)</span> coefficient helps to mop up the variance that the penalization opened up and reduces prediction error for the observations it helped predict in the OLS estimate.</p>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p>But those are just two simulations, does this pattern hold up more widely? The next figure shows the correlation between <span class="math inline">\(\epsilon_x\)</span> and <span class="math inline">\(\epsilon_z\)</span> for simulations where the OLS estimate of <span class="math inline">\(\beta_z\)</span> took on different values. We see a sharp discontinuity at zero, where the correlation between the two types of variance available to model switches from positive to negative.</p>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p>We can also plot the LASSO estimates for <span class="math inline">\(\beta_z\)</span> against the OLS estimates. This shows a clear shift in behavior where <span class="math inline">\(\beta_z\)</span> shifts from positive to negative in the OLS estimate.</p>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<p>Overall, this shows that penalized estimators can have some unexpected behavior because of the interaction between the least squares and penalty components of the loss function.</p>

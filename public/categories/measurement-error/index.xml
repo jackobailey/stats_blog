@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>measurement error on The File Drawer</title>
+    <link>https://filedrawer.blog/categories/measurement-error/</link>
+    <description>Recent content in measurement error on The File Drawer</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Fri, 23 Jun 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://filedrawer.blog/categories/measurement-error/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Can you use IRT estimates in an error-in-variables model? A tentative yes.</title>
+      <link>https://filedrawer.blog/post/take_measurement_seriously/</link>
+      <pubDate>Fri, 23 Jun 2023 00:00:00 +0000</pubDate>
+      
+      <guid>https://filedrawer.blog/post/take_measurement_seriously/</guid>
+      <description>One of the laments I often hear in social science is that we don’t take measurement error seriously enough. Fair enough! This blogpost is a record of me attempting to take it seriously. I’m going to focus on error-in-variables models with IRT estimates in this post, but I’ve also been playing around with multiple over-imputation and plausible values, so other brands are available.1
+tl;dr measurement error is really hard to deal with, but error-in-variables regression seems to be able to play reasonably nicely with IRT models after a bit of work.</description>
+    </item>
+    
+  </channel>
+</rss>
