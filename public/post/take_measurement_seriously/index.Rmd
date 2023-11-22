@@ -26,6 +26,13 @@ options(scipen=9999)
 knitr::opts_knit$set(eval.after = "fig.cap")
 set.seed(10033)
 library(modelsummary)
+library(rmarkdown)
+library(kableExtra)
+library(knitr)
+library(eivtools)
+library(modelsummary)
+library(dplyr)
+
 ```
 
 
@@ -78,7 +85,6 @@ While the coefficient on $x_2$ is attenuated, that leads to a large overestimati
 In the toy example, there are solutions. Here's what an error-in-variables model from the *eivtools* package will give you when you tell it how much error $x_2$ was observed with:
 
 ```{r}
-library(dplyr)
 summarizeEIV <- function(mod) {
   su.mod  <- summary(mod)
   su.mod$unadj_coefficients
@@ -95,15 +101,16 @@ summarizeEIV <- function(mod) {
 ```
 
 ```{r, echo = T}
-library(eivtools)
-library(knitr)
-library(kableExtra)
-library(modelsummary)
+
 sigmas <- diag(c(x1 = 0, x2obs = 1))^2
 rownames(sigmas) <- colnames(sigmas) <- c("x1", "x2obs")
 eiv.basic <- eivreg(data = data.frame(y, x1, x2obs), 
                     formula = y~x1 + x2obs, 
                     Sigma_error =  sigmas)
+
+```
+
+```{r}
 kable(round(summarizeEIV(eiv.basic), 3), escape = F, booktabs = TRUE)
 
 ```
@@ -202,7 +209,6 @@ x2.hat <- fscores(x2.mod, full.scores= TRUE, full.scores.SE = TRUE, method = "EA
 These scores are correlated pretty strongly with the underlying latent variable:
 
 ```{r, include = F}
-library(knitr)
 
 x1.sum <- x1a + x1b + x1c + x1d + x1e + x1f
 x2.sum <- x2a + x2b+ x2c + x2d

@@ -31,6 +31,8 @@ knitr::opts_knit$set(eval.after = "fig.cap")
 # bib <- bib[!grepl("^url =|^doi =", bib)]
 # writeLines(bib, con = "comparativenodoi.bib")
 
+# devtools::install_github("jon-mellon/drake@main")
+
 
 
 library(ggplot2)
@@ -335,6 +337,10 @@ if(Sys.info()["sysname"] == "Darwin"){
 } else if(Sys.getenv("USERNAME")=="Jon") {
   panel.folder <- "C:/Dropbox/BES voter change paper"
   cs.folder <- "C:/Dropbox/cross_section_coding"
+  # drake.folder <- "C:/Dropbox/drake/"
+}else if(Sys.getenv("USERNAME")=="jonathan.mellon") {
+  panel.folder <- "C:/Users/jonathan.mellon/Dropbox/BES voter change paper"
+  cs.folder <- "C:/Users/jonathan.mellon/Dropbox/cross_section_coding"
   # drake.folder <- "C:/Dropbox/drake/"
 }
 

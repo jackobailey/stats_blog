@@ -18,6 +18,16 @@ tl;dr measurement error is really hard to deal with, but error-in-variables regr
     </item>
     
     <item>
+      <title>Alcohol and Asteroids</title>
+      <link>https://filedrawer.blog/post/oster_pregnancy_alcohol/</link>
+      <pubDate>Tue, 22 Mar 2022 00:00:00 +0000</pubDate>
+      
+      <guid>https://filedrawer.blog/post/oster_pregnancy_alcohol/</guid>
+      <description>I recently read Emily Oster’s book: Expecting Better: Why the Conventional Pregnancy Wisdom is Wrong—and What You Really Need to Know. Oster proposes using decision theory to use data on different activities during pregnancy to make decisions that best reflect your preferences.
+The most controversial aspect of the book has been her claim that there is no risk to light drinking during pregnancy. This view has been criticized quite intensely, but I think these critiques don’t get to the heart of the issue.</description>
+    </item>
+    
+    <item>
       <title>Do cluster robust standard errors give false positives on cross-level interactions?</title>
       <link>https://filedrawer.blog/post/random-slopes-clustered-errors/</link>
       <pubDate>Mon, 21 Mar 2022 00:00:00 +0000</pubDate>
@@ -29,15 +39,6 @@ The key point here is that there are only really three independent pieces of inf
     </item>
     
     <item>
-      <title>Do some parties need to mobilize the base to win elections?</title>
-      <link>https://filedrawer.blog/post/parties-mobilize-win/</link>
-      <pubDate>Mon, 07 Mar 2022 00:00:00 +0000</pubDate>
-      
-      <guid>https://filedrawer.blog/post/parties-mobilize-win/</guid>
-      <description>I recently posted a working paper showing how to decompose overall volatility in election results into party switching, turnout switching and population replacement. I showed that across 104 election pairs, party switching was the most important factor for electoral change in 97% of cases. This flies in the face of a lot of conventional wisdom that there are no swing voters and that elections are won by energizing the base.</description>
-    </item>
-    
-    <item>
       <title>Why is this the answer?</title>
       <link>https://filedrawer.blog/post/why-is-this-the-answer/</link>
       <pubDate>Mon, 13 Dec 2021 21:13:14 -0500</pubDate>
@@ -46,6 +47,26 @@ The key point here is that there are only really three independent pieces of inf
       <description>In my previous post I showed that the minimum inverse-probability weight in a simple random sample should be equal to the response rate of the survey. However, since simple random samples are basically non-existent in the real world, I need to work out the equivalent constraint for complex survey designs.
 This post summarizes my progress so far towards doing that.
 In the previous post I speculated that the constraint for \(i\)’s weight should be:</description>
+    </item>
+    
+    <item>
+      <title>Farage&#39;s Brexit Party Announcement and the 2019 Campaign</title>
+      <link>https://filedrawer.blog/post/bit-more-on-brexit-party/</link>
+      <pubDate>Fri, 10 Dec 2021 21:12:06 -0500</pubDate>
+      
+      <guid>https://filedrawer.blog/post/bit-more-on-brexit-party/</guid>
+      <description>John Curtice, Stephen Fisher, and Patrick English made headlines recently for claiming that Nigel Farage’s decision to stand down his party in certain seats saved the Labour Party from an even worse result in the 2019 general election. They have a nice blog on the topic that they released on Elections Etc. today. I also have some data on this topic, but haven’t released it until now.
+In the middle of the 2019 campaign there was an ONS announcement of the latest GDP data.</description>
+    </item>
+    
+    <item>
+      <title>A simple function for creating dummy variables in R</title>
+      <link>https://filedrawer.blog/post/dummy-variable-function/</link>
+      <pubDate>Fri, 10 Dec 2021 21:09:33 -0500</pubDate>
+      
+      <guid>https://filedrawer.blog/post/dummy-variable-function/</guid>
+      <description>As someone interested in economic voting, I create a lot of dummy variables. Most often, I have to use self-reported vote choice to create a dummy variable that shows if a respondent voted for the incumbent party or not.
+For the uninitiated, a “dummy variable” is like a light switch. It can be either “off” (where it equals 0) or “on” (where it equals 1). We tend to use them to work out how the presence of something we’re interested in affects an outcome.</description>
     </item>
     
     <item>
