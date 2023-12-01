@@ -1,0 +1,79 @@
+---
+title: "What can South Park teach us about writing political science papers?"
+author: "Jon Mellon"
+date: '2023-06-23'
+math: true
+categories: ["political science", "writing"]
+tags: ["statistics",  "political science", "introduction"]
+output:
+ bookdown::html_document2:
+  latex_engine: xelatex
+  keep_tex: true
+  toc: false
+ bookdown::pdf_document2:
+  latex_engine: xelatex
+  keep_tex: true
+  toc: false
+ bookdown::word_document2:
+  latex_engine: xelatex
+  keep_tex: true
+always_allow_html: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning=FALSE, error=FALSE, message = FALSE)
+options(scipen=9999)
+knitr::opts_knit$set(eval.after = "fig.cap")
+set.seed(10033)
+```
+
+
+I've spent a lot of time writing and rewriting introductions to papers recently. Whether those were drafted by me, my PhD students, coauthors, or undergraduates, I've noticed a common pattern. At some point I lose track of what the point is. If you go through sentence by sentence, each idea generally makes sense, but for some reason I'm losing track of what the goal is. 
+
+The creators of South Park have talked about a test they do on scripts to understand why the narrative doesn't flow properly. The test is very simple. Take each beat of the script and ask does it link to the next beat via the words "and then" or via the words "but" or "therefore". 
+
+
+So you might tell a story that:
+
+Jenny got in her car and drove to work *and then* she got hungry *and then* she got into a fight with her coworker.
+
+But a more compelling rewrite would make beats that connect with "but" or "therefore"
+
+Jenny overslept *therefore* she forgot to pack her lunch *therefore* she was hungry and grumpy at work *therefore* she got into an unnecessary fight with her coworker *but* her coworker thought Jenny was upset about the report she submitted. 
+
+Each point being made is clearly linked to the previous one causally (therefore) or by a contrast of expectations (but). 
+
+OK, so how does this relate to political science paper introductions? A lot of the introductions (and often the rest of a paper) I read (including ones I write initially) are a bag of ideas without a clear logic to why they are presented in a clear order. 
+
+ 
+
+You need to think carefully through what your argument in the paper is. i.e. exactly what gap are you addressing and how are you going to address it. Related to that, you then need to be clear at all times how each paragraph relates back to the core goal of the paper. e.g. it should always be crystal clear what the point of every paragraph is. A good way to help with this is to use topic sentences where the first sentence of each paragraph tells us what the point of the paragraph is. You have topic sentences at the moment, but they don't spell out a straightforward narrative about what your argument is. 
+
+
+
+One way I find helpful to improve these skills is by breaking down other papers that do it well. Here's an example from a recent APSR piece Can Racial Diversity among Judges Affect Sentencing Outcomes? | American Political Science Review | Cambridge Core (I've annotated what the sentence says about the function of each paragraph):
+
+Most residents of the United States will never meet their congressional or state representatives, but many will have contact with other state and local officials, including those from the institutions comprising the carceral system, at some point. 
+this paragraph is explaining the context of the study and why it matters
+Millions of people are arrested in the United States every year, and the vast majority of these individuals appear, are convicted, and receive their sentences in lower-level state courts.
+more reasons why this problem really matters a lot
+While research on the effects of racial diversity in the judiciary has largely focused on the impact of individual judges’ identities on decision making, much less work has investigated the impact of racial diversity as a contextual feature of the bench. 
+this is the gap in the literature
+Political scientists and criminologists have shown that the context in which a trial judge works can influence their sentencing decisions (Eisenstein, Flemming and Nardulli1988; Ulmer and Johnson2004). 
+here's my justification for why contextual effects might matter
+Recent scholarship examining policing identifies the role of descriptive representation for improving racial balance in criminal legal outcomes, and it shows that decreasing disparities in these outcomes requires a focus on institutions, rather than just the potential biases of individual actors (Eckhouse2019; Kennedy, Butz, Lajevardi and Nanes2017;  Sances and You2017). 
+here's a finding in a parallel situation which further justifies my approach
+To investigate the relationship between racial diversity among judges and sentencing decisions, I analyze approximately 20 years of felony case data from one of the largest unified court systems in the United States.
+here's what this paper does
+This article makes three important contributions.
+these are the contributions of the paper
+Finally, the findings suggest an important consideration for conceiving state responses to crime. 
+these are the wider implications of the paper's findings
+This is just one example, but you'll find that most polisci papers follow a fairly similar structure. The key thing here is that each paragraph is doing clear work to setup the motivation of the paper, the gap in the literature, and the particular way this paper goes about filling this gap. The flow also makes logical sense. The first two paragraphs tell us why the problem is important, so it naturally makes sense to care about gaps in our knowledge about the problem. Given that there's a gap, it naturally makes sense to understand what might fill that gap. Once we've established how that gap should be filled, it naturally makes sense that the paper should go ahead and fill it. Now that we know what the paper does, we want to know what it found and what it tells us. And now we know the results, it naturally makes sense that we would want to think about the implications of those results. 
+
+This is something to focus on for all the sections and not just the introduction but it's most crucial there because that's where you set the reader's expectations about what you're going to show them. 
+
+Other comments
+In general, I think the coding scheme you've developed looks good, but the writeup is not consistently clear about how this scheme emerges from your qualitative analysis. I suspect the paper could benefit from having an explicit qualitative results section followed by a coding scheme section that refers back to the results of the qualitative analysis when justifying the choices you make.
+
+I'm not suggesting that you address all of these comments prior to annual review, but I think these are crucial to address prior to submitting the paper for publication. Again, I definitely want to emphasize that there's a ton of good material here, so my comments are about communicating that more effectively to readers. 

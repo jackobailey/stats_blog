@@ -149,8 +149,10 @@ eirt.validation.plot <- ggplot(eirt.comb, aes(x = coef.true, y = coef.est, colou
                                                             shape = num.indicators)) +
   geom_point() + xlab("True coefficient") +
   facet_grid(cols = vars(reliability.method)) + ylab("Estimated coefficient") + 
-  ylim(c(-1,1)) + xlim(c(-1,1)) + geom_errorbar(aes(ymin = coef.true,ymax = coef.est), size=0.5) + 
-  geom_abline(size = 0.25, linetype = 2) + theme_bw()
+  ylim(c(-1,1)) + xlim(c(-1,1)) + 
+  geom_errorbar(aes(ymin = coef.true,ymax = coef.est), size=0.5) + 
+  geom_abline(size = 0.25, linetype = 2) + 
+  theme_bw()
 
 eirt.validation.plot
 
